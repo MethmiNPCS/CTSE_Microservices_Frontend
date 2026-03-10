@@ -5,51 +5,17 @@ import Card from "../components/ui/Card";
 import Input from "../components/ui/Input";
 import SectionHeader from "../components/ui/SectionHeader";
 import PageShell from "../components/layout/PageShell";
+import eventsData from "../data/events";
 
-const featuredEvents = [
-  {
-    title: "Neon River Festival",
-    date: "Aug 20, 2026",
-    location: "Colombo Waterfront",
-    price: "$45",
-  },
-  {
-    title: "Skyline Soundscape",
-    date: "Sep 12, 2026",
-    location: "Galle Face Arena",
-    price: "$60",
-  },
-  {
-    title: "Pulse of the City",
-    date: "Oct 05, 2026",
-    location: "Kandy Night Market",
-    price: "$35",
-  },
-];
+const { events, featuredEventIds, upcomingEventIds } = eventsData;
 
-const upcomingEvents = [
-  {
-    title: "Lantern Drift Party",
-    description: "Glow-in-the-dark dance floors with immersive art zones.",
-    date: "Aug 28, 2026",
-    location: "Negombo Beach",
-    price: "$38",
-  },
-  {
-    title: "Aurora Street Parade",
-    description: "Live DJs, confetti bursts, and sunrise brunch lanes.",
-    date: "Sep 03, 2026",
-    location: "Colombo Fort",
-    price: "$25",
-  },
-  {
-    title: "Midnight Mango",
-    description: "Tropical beats and rooftop lounges under neon skies.",
-    date: "Sep 18, 2026",
-    location: "Ella Ridge",
-    price: "$52",
-  },
-];
+const featuredEvents = featuredEventIds
+  .map((id) => events.find((event) => event.id === id))
+  .filter(Boolean);
+
+const upcomingEvents = upcomingEventIds
+  .map((id) => events.find((event) => event.id === id))
+  .filter(Boolean);
 
 const testimonials = [
   {
@@ -150,13 +116,13 @@ export default function Home() {
                 <div className="space-y-2">
                   <div className="text-lg font-semibold">{event.title}</div>
                   <div className="text-sm text-[var(--muted)]">
-                    {event.date} · {event.location}
+                    {event.startDate} · {event.location}
                   </div>
                   <div className="text-sm font-semibold text-[var(--brand)]">
-                    {event.price}
+                    {event.ticketPrice}
                   </div>
                 </div>
-                <Link href="/events">
+                <Link href={`/events/${event.id}`}>
                   <Button size="sm">View Event</Button>
                 </Link>
               </Card>
@@ -183,13 +149,13 @@ export default function Home() {
                     {event.description}
                   </p>
                   <div className="text-sm text-[var(--muted)]">
-                    {event.date} · {event.location}
+                    {event.startDate} · {event.location}
                   </div>
                   <div className="text-sm font-semibold text-[var(--brand)]">
-                    {event.price}
+                    {event.ticketPrice}
                   </div>
                 </div>
-                <Link href="/events">
+                <Link href={`/events/${event.id}`}>
                   <Button size="sm" variant="secondary">
                     View Details
                   </Button>
@@ -215,7 +181,9 @@ export default function Home() {
               >
                 <div className="h-32 rounded-2xl bg-[var(--surface-2)]/80" />
                 <div className="mt-4 text-sm font-semibold">{event.title}</div>
-                <div className="text-xs text-[var(--muted)]">{event.date}</div>
+                <div className="text-xs text-[var(--muted)]">
+                  {event.startDate}
+                </div>
               </Card>
             ))}
           </div>
