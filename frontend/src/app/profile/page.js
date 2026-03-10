@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
@@ -55,6 +57,17 @@ export default function ProfilePage() {
           <Button className="w-full sm:w-auto">Change Password</Button>
         </Card>
       </section>
+
+      <Card className="flex flex-wrap items-center justify-between gap-4">
+        <SectionHeader
+          eyebrow="Bookings"
+          title="View my bookings"
+          subtitle="Check ticket details, dates, and booking status."
+        />
+        <Link href="/bookings">
+          <Button>Go to My Bookings</Button>
+        </Link>
+      </Card>
     </PageShell>
   );
 }
