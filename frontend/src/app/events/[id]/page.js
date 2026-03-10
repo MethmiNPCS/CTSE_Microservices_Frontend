@@ -6,6 +6,7 @@ import Card from "../../../components/ui/Card";
 import Input from "../../../components/ui/Input";
 import SectionHeader from "../../../components/ui/SectionHeader";
 import PageShell from "../../../components/layout/PageShell";
+import BookingModal from "../../../components/events/BookingModal";
 import eventsData from "../../../data/events";
 
 const { events } = eventsData;
@@ -66,7 +67,7 @@ export default async function EventDetailPage({ params }) {
               ))}
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Button size="lg">Book Now</Button>
+              <BookingModal event={event} />
               <Button variant="secondary" size="lg">
                 View Seat Map
               </Button>
