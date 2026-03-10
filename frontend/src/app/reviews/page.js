@@ -48,7 +48,12 @@ const emptyForm = {
 };
 
 const selectClassName =
-  "w-full rounded-2xl border border-white/10 bg-[var(--surface)]/80 px-4 py-2 text-sm text-[var(--foreground)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring)]";
+  "w-full rounded-2xl border border-black/15 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring)]";
+
+const cardClassName =
+  "border-black/10 bg-white/85 shadow-[0_22px_45px_-30px_rgba(15,23,42,0.35)]";
+const fieldClassName =
+  "border-black/15 bg-white text-slate-900 placeholder:text-slate-500 shadow-sm";
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState(myReviews);
@@ -140,13 +145,13 @@ export default function ReviewsPage() {
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-4">
           {reviews.length === 0 ? (
-            <Card className="text-sm text-[var(--muted)]">
+            <Card className={`text-sm text-[var(--muted)] ${cardClassName}`}>
               No reviews yet. Create your first review to see it here.
             </Card>
           ) : null}
 
           {reviews.map((review) => (
-            <Card key={review.id} className="space-y-3">
+            <Card key={review.id} className={`space-y-3 ${cardClassName}`}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="text-lg font-semibold">{review.eventName}</div>
@@ -195,7 +200,7 @@ export default function ReviewsPage() {
         </div>
 
         <div className="space-y-6">
-          <Card className="space-y-4">
+          <Card className={`space-y-4 ${cardClassName}`}>
             <div className="text-xs uppercase tracking-[0.3em] text-[var(--brand-2)]">
               {editingId ? "Edit review" : "New review"}
             </div>
@@ -205,6 +210,7 @@ export default function ReviewsPage() {
                 value={form.eventName}
                 onChange={handleChange}
                 placeholder="Event name"
+                className={fieldClassName}
                 required
               />
               <Input
@@ -212,6 +218,7 @@ export default function ReviewsPage() {
                 value={form.eventId}
                 onChange={handleChange}
                 placeholder="Event ID"
+                className={fieldClassName}
                 required
               />
               <div className="grid gap-3 sm:grid-cols-2">
@@ -233,7 +240,7 @@ export default function ReviewsPage() {
                         className={`text-2xl leading-none transition ${
                           value <= form.rating
                             ? "text-[var(--brand-2)]"
-                            : "text-white/30"
+                            : "text-black/30"
                         } hover:text-[var(--brand-2)]`}
                         aria-pressed={value <= form.rating}
                         aria-label={`${value} star${value > 1 ? "s" : ""}`}
@@ -248,6 +255,7 @@ export default function ReviewsPage() {
                   value={form.date}
                   onChange={handleChange}
                   placeholder="Review date"
+                  className={fieldClassName}
                   required
                 />
               </div>
@@ -264,7 +272,7 @@ export default function ReviewsPage() {
                 name="comment"
                 value={form.comment}
                 onChange={handleChange}
-                className="min-h-[140px] w-full rounded-2xl border border-white/10 bg-[var(--surface)]/80 px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                className="min-h-[140px] w-full rounded-2xl border border-black/15 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
                 placeholder="Write your review"
                 required
               />
@@ -279,7 +287,7 @@ export default function ReviewsPage() {
             </form>
           </Card>
 
-          <Card className="space-y-3">
+          <Card className={`space-y-3 ${cardClassName}`}>
             <div className="text-xs uppercase tracking-[0.3em] text-[var(--brand-2)]">
               Review stats
             </div>
