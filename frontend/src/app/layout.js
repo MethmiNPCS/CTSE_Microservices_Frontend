@@ -1,7 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
+import AppChrome from "../components/layout/AppChrome";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,9 +27,7 @@ export default function RootLayout({ children }) {
           className="flex min-h-screen flex-col bg-[var(--background)] text-[var(--foreground)]"
           style={{ backgroundImage: "var(--glow-gradient)" }}
         >
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <AppChrome>{children}</AppChrome>
         </div>
       </body>
     </html>
