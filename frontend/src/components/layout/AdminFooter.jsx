@@ -2,7 +2,8 @@ import Link from "next/link";
 
 const adminLinks = [
   { label: "Dashboard", href: "/admin/dashboard" },
-  { label: "Events", href: "/admin/events" },
+  { label: "Event Portal", href: "/admin/events" },
+  { label: "Booking Portal", href: "/admin/bookings" },
 ];
 
 export default function AdminFooter() {

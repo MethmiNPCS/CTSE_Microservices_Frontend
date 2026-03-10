@@ -56,9 +56,14 @@ export default function AdminDashboardPage() {
             <Link href="/admin/events">
               <Button className="w-full">Manage Events</Button>
             </Link>
-            <Link href="/admin/events">
+            <Link href="/admin/bookings">
               <Button variant="secondary" className="w-full">
-                Event Status
+                Manage Bookings
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="secondary" className="w-full">
+                User Portal
               </Button>
             </Link>
           </div>

@@ -135,7 +135,7 @@ export default function AdminEventsPage() {
     <PageShell className="space-y-10">
       <SectionHeader
         eyebrow="Admin"
-        title="Event management"
+        title="Event portal"
         subtitle="Create, edit, and control event listings."
       />
 
