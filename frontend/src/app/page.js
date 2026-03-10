@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Input from "../components/ui/Input";
@@ -81,10 +83,14 @@ export default function Home() {
               VIP upgrades, and instant access to the most electric nights.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Button size="lg">Explore Events</Button>
-              <Button variant="secondary" size="lg">
-                View Lineup
-              </Button>
+              <Link href="/events">
+                <Button size="lg">Explore Events</Button>
+              </Link>
+              <Link href="/events">
+                <Button variant="secondary" size="lg">
+                  View Lineup
+                </Button>
+              </Link>
             </div>
             <div className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-[var(--surface)]/60 p-4 sm:flex-row sm:items-center">
               <Input placeholder="Search by event, city, or vibe" />
@@ -150,7 +156,9 @@ export default function Home() {
                     {event.price}
                   </div>
                 </div>
-                <Button size="sm">View Event</Button>
+                <Link href="/events">
+                  <Button size="sm">View Event</Button>
+                </Link>
               </Card>
             ))}
           </div>
@@ -181,9 +189,11 @@ export default function Home() {
                     {event.price}
                   </div>
                 </div>
-                <Button size="sm" variant="secondary">
-                  View Details
-                </Button>
+                <Link href="/events">
+                  <Button size="sm" variant="secondary">
+                    View Details
+                  </Button>
+                </Link>
               </Card>
             ))}
           </div>
