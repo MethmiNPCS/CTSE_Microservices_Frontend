@@ -67,7 +67,11 @@ export default async function EventDetailPage({ params }) {
               ))}
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <BookingModal event={event} />
+              <Link href={`/ticket-selection?title=${encodeURIComponent(event.title)}&date=${encodeURIComponent(event.startDate)}&location=${encodeURIComponent(event.location)}&image=${encodeURIComponent(event.galleryImages?.[0] || '')}`}>
+                <Button variant="primary" size="lg">
+                  Book Tickets
+                </Button>
+              </Link>
               <Button variant="secondary" size="lg">
                 View Seat Map
               </Button>
