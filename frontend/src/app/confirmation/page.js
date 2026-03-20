@@ -51,7 +51,7 @@ export default function ConfirmationPage() {
             <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 text-4xl">
               🎉
             </div>
-            <h1 className="mt-6 text-2xl font-semibold text-gray-900">
+            <h1 className="mt-6 text-2xl font-semibold" style={{ color: '#b30000' }}>
               Thanks a lot for purchasing tickets
             </h1>
             <p className="mt-2 text-sm text-gray-500">
@@ -71,9 +71,9 @@ export default function ConfirmationPage() {
                   />
                   <div className="space-y-4 border-t border-dashed border-gray-200 px-6 py-6 text-left">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-blue-400">Ticket</p>
-                      <h2 className="text-xl font-semibold text-gray-900">{ticket.title}</h2>
-                      <p className="text-sm text-gray-500">{ticket.location}</p>
+                      <p className="text-xs uppercase tracking-[0.3em]" style={{ color: '#003366' }}>Ticket</p>
+                      <h2 className="text-xl font-semibold" style={{ color: '#003366' }}>{ticket.title}</h2>
+                      <p className="text-sm" style={{ color: '#003366' }}>{ticket.location}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
                       <div>
