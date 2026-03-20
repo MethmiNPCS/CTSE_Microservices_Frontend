@@ -109,6 +109,18 @@ export default function ConfirmationPage() {
               ))}
             </div>
 
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <button
+                type="button"
+                onClick={() => {
+                  window.history.back();
+                }}
+                className="flex items-center gap-2 rounded-2xl border border-blue-200 px-6 py-3 text-blue-600 transition hover:bg-blue-50"
+              >
+                ← Previous
+              </button>
+            </div>
+
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <button
                 type="button"
