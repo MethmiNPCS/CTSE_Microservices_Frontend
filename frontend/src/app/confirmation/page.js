@@ -105,7 +105,7 @@ export default function ConfirmationPage() {
                       </div>
                     </div>
                     <div className="border-t border-gray-100 pt-4 text-center text-sm text-gray-500">
-                      SeatSnaps — Present this ticket at the entry gate.
+                      EventWave — Present this ticket at the entry gate.
                     </div>
                   </div>
                 </article>
