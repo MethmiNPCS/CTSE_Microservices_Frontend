@@ -33,6 +33,7 @@ export default function PaymentPage() {
   const vipCount = parseInt(searchParams.get("vipCount")) || 0;
   const standardCount = parseInt(searchParams.get("standardCount")) || 0;
   const totalTickets = vipCount + standardCount;
+  const seats = searchParams.get("seats") || "";
   const vipPrice = 4000;
   const standardPrice = 1500;
   const ticketPrice = (vipCount * vipPrice) + (standardCount * standardPrice);
@@ -46,7 +47,7 @@ export default function PaymentPage() {
   const handlePrevious = () => router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
   const handleSubmit = (event) => {
     event.preventDefault();
-    router.push(`/confirmation?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}&fullName=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}&email=${encodeURIComponent(userEmail)}`);
+    router.push(`/confirmation?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}&fullName=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}&email=${encodeURIComponent(userEmail)}`);
   };
 
   return (

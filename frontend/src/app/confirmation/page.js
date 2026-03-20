@@ -14,34 +14,21 @@ export default function ConfirmationPage() {
   const userPhone = searchParams.get("phone") || "";
   const userEmail = searchParams.get("email") || "";
 
-  const purchasedTickets = [
-    {
-      title: eventTitle,
-      date: eventDate,
-      time: "9:00 PM",
-      zone: "A",
-      row: "B",
-      seat: "B12",
-      location: eventLocation,
-      holder: userName,
-      phone: userPhone,
-      email: userEmail,
-      image: eventImage,
-    },
-    {
-      title: eventTitle,
-      date: eventDate,
-      time: "9:00 PM",
-      zone: "A",
-      row: "B",
-      seat: "B13",
-      location: eventLocation,
-      holder: userName,
-      phone: userPhone,
-      email: userEmail,
-      image: eventImage,
-    },
-  ];
+  const seatsParam = searchParams.get("seats") || "";
+  const seatNumbers = seatsParam ? seatsParam.split(",") : [];
+  const purchasedTickets = seatNumbers.map((seat) => ({
+    title: eventTitle,
+    date: eventDate,
+    time: "9:00 PM",
+    zone: seat[0],
+    row: seat[0],
+    seat,
+    location: eventLocation,
+    holder: userName,
+    phone: userPhone,
+    email: userEmail,
+    image: eventImage,
+  }));
 
   const handleDownload = () => alert("Downloading ticket...");
   const handleShare = () => alert("Sharing ticket via email...");

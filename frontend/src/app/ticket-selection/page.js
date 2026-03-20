@@ -34,7 +34,7 @@ export default function TicketSelection() {
 
   return (
     <main
-      className="min-h-screen flex flex-col items-center justify-center py-10 px-4 text-[var(--foreground)]"
+      className="min-h-screen flex flex-col items-center justify-center py-10 px-4 text-foreground"
       style={{
         backgroundColor: "var(--background)",
         backgroundImage: "var(--glow-gradient)",
