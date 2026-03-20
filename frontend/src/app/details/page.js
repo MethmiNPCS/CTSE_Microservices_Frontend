@@ -99,14 +99,17 @@ export default function DetailsPage() {
                 </div>
               </label>
 
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
+              <div className="flex flex-wrap items-center gap-2 mb-6">
                 <button
                   type="button"
                   onClick={handlePrevious}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-blue-200 px-6 py-3 text-blue-600 transition hover:bg-blue-50 md:flex-none md:px-10"
+                  className="flex items-center gap-2 rounded-2xl border border-blue-200 px-6 py-3 text-blue-600 transition hover:bg-blue-50"
                 >
                   ← Previous
                 </button>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
                 <button
                   type="submit"
                   className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-white shadow-lg transition hover:bg-blue-700 md:flex-none md:px-12"

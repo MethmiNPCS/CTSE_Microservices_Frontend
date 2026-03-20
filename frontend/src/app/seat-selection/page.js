@@ -178,13 +178,15 @@ export default function SeatSelectionPage() {
           </div>
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-            <button
-              type="button"
-              onClick={handlePrevious}
-              className="flex items-center gap-2 rounded-2xl border border-blue-200 bg-white px-6 py-3 text-blue-600 transition hover:bg-blue-50"
-            >
-              ← Previous
-            </button>
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <button
+                type="button"
+                onClick={handlePrevious}
+                className="flex items-center gap-2 rounded-2xl border border-blue-200 px-6 py-3 text-blue-600 transition hover:bg-blue-50"
+              >
+                ← Previous
+              </button>
+            </div>
             <button
               type="button"
               onClick={handleNext}
