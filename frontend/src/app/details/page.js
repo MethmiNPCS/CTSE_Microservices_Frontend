@@ -27,7 +27,8 @@ export default function DetailsPage() {
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePrevious = () => router.push(`/seat-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
+  // Removed duplicate handlePrevious declaration
+  const handlePrevious = () => router.push(`/seat-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}`);
 
   const handleSubmit = (event) => {
     event.preventDefault();
