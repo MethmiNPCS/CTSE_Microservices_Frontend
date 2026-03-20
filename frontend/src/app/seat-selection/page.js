@@ -23,8 +23,15 @@ export default function SeatSelectionPage() {
     searchParams.get("image") ||
     "https://images.unsplash.com/photo-1470223991230-32aaa7d6c9b7?auto=format&fit=crop&w=400&q=80";
 
+  const vipCount = parseInt(searchParams.get("vipCount")) || 0;
+  const standardCount = parseInt(searchParams.get("standardCount")) || 0;
+  const totalTickets = vipCount + standardCount;
+
   const toggleSeat = (seatId) => {
     if (reservedSeats.has(seatId)) {
+      return;
+    }
+    if (!selectedSeats.has(seatId) && selectedSeats.size >= maxSeats) {
       return;
     }
 
@@ -40,12 +47,14 @@ export default function SeatSelectionPage() {
   };
 
   const handlePrevious = () => {
-    router.push(`/ticket-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
+    router.push(`/ticket-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
   };
 
   const handleNext = () => {
-    router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
+    router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
   };
+
+  const maxSeats = totalTickets;
 
   const renderSeat = (row, index) => {
     const seatNumber = `${row}${index + 1}`;

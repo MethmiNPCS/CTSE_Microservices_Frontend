@@ -16,6 +16,9 @@ export default function TicketSelection() {
   const eventDate = searchParams.get("date") || "Event Date";
   const eventLocation = searchParams.get("location") || "Event Location";
   const eventImage = searchParams.get("image") || "https://images.unsplash.com/photo-1464983953574-0892a7162a1e?auto=format&fit=crop&w=400&q=80";
+  const vipCountParam = searchParams.get("vipCount") || 0;
+  const standardCountParam = searchParams.get("standardCount") || 0;
+  const totalTickets = parseInt(vipCountParam) + parseInt(standardCountParam);
 
   const handleVipChange = (delta) => {
     setVipCount((prev) => Math.max(0, prev + delta));
@@ -23,6 +26,10 @@ export default function TicketSelection() {
 
   const handleStandardChange = (delta) => {
     setStandardCount((prev) => Math.max(0, prev + delta));
+  };
+
+  const handleNext = () => {
+    router.push(`/seat-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
   };
 
   return (
@@ -87,9 +94,7 @@ export default function TicketSelection() {
         {/* Next Button */}
         <button
           className="w-full bg-blue-600 text-white py-4 rounded-xl text-xl font-semibold hover:bg-blue-700 transition"
-          onClick={() => {
-            router.push(`/seat-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
-          }}
+          onClick={handleNext}
         >
           Next →
         </button>
