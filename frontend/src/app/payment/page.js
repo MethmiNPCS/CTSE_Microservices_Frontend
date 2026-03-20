@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import BookingSteps from "@/components/layout/BookingSteps";
+import { useSearchParams } from "next/navigation";
 
 const paymentOptions = [
   {
@@ -23,15 +24,20 @@ export default function PaymentPage() {
   const router = useRouter();
   const [promo, setPromo] = useState("");
   const [selectedMethod, setSelectedMethod] = useState(paymentOptions[0].id);
+  const searchParams = useSearchParams();
+  const eventTitle = searchParams.get("title") || "Event Title";
+  const eventDate = searchParams.get("date") || "Event Date";
+  const eventLocation = searchParams.get("location") || "Event Location";
+  const eventImage = searchParams.get("image") || "https://images.unsplash.com/photo-1464983953574-0892a7162a1e?auto=format&fit=crop&w=400&q=80";
 
   const ticketPrice = 3000;
   const serviceFee = 100;
   const total = ticketPrice + serviceFee;
 
-  const handlePrevious = () => router.push("/details");
+  const handlePrevious = () => router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
   const handleSubmit = (event) => {
     event.preventDefault();
-    router.push("/confirmation");
+    router.push(`/confirmation?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
   };
 
   return (

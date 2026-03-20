@@ -40,11 +40,11 @@ export default function SeatSelectionPage() {
   };
 
   const handlePrevious = () => {
-    router.push("/ticket-selection");
+    router.push(`/ticket-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
   };
 
   const handleNext = () => {
-    router.push("/details");
+    router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
   };
 
   const renderSeat = (row, index) => {
