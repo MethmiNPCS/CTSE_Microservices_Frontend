@@ -95,10 +95,17 @@ export default function TicketSelection() {
         <div className="flex flex-wrap items-center gap-2 mb-6 mt-4">
           <button
             type="button"
-            onClick={() => router.push("/")}
+            onClick={() => {
+              const eventId = searchParams.get("id") || "";
+              if (eventId) {
+                router.push(`/events/${eventId}`);
+              } else {
+                router.push("/");
+              }
+            }}
             className="flex items-center gap-2 rounded-2xl border border-gray-200 px-6 py-3 text-gray-600 transition hover:bg-gray-50"
           >
-            ← Home
+            ← Event
           </button>
           <button
             className="bg-blue-600 text-white py-4 rounded-xl text-xl font-semibold hover:bg-blue-700 transition flex-1"

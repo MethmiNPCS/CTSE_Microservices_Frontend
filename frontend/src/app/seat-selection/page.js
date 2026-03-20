@@ -13,7 +13,13 @@ const initialSelectedSeats = ["H7", "H8"];
 export default function SeatSelectionPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [selectedSeats, setSelectedSeats] = useState(() => new Set(initialSelectedSeats));
+  const seatsParam = searchParams.get("seats") || "";
+  const [selectedSeats, setSelectedSeats] = useState(() => {
+    if (seatsParam) {
+      return new Set(seatsParam.split(",").filter(Boolean));
+    }
+    return new Set(initialSelectedSeats);
+  });
 
   const eventTitle = searchParams.get("title") || "March Gala Night";
   const eventDate = searchParams.get("date") || "March 15, 2025 - March 16, 2025";
