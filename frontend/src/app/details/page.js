@@ -30,7 +30,7 @@ export default function DetailsPage() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    router.push(`/payment?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
+    router.push(`/payment?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}&fullName=${encodeURIComponent(formValues.fullName)}&phone=${encodeURIComponent(formValues.phone)}&email=${encodeURIComponent(formValues.email)}`);
   };
 
   return (

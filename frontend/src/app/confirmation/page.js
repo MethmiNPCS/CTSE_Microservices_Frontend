@@ -10,6 +10,10 @@ export default function ConfirmationPage() {
   const eventLocation = searchParams.get("location") || "Event Location";
   const eventImage = searchParams.get("image") || "https://images.unsplash.com/photo-1464983953574-0892a7162a1e?auto=format&fit=crop&w=400&q=80";
 
+  const userName = searchParams.get("fullName") || "";
+  const userPhone = searchParams.get("phone") || "";
+  const userEmail = searchParams.get("email") || "";
+
   const purchasedTickets = [
     {
       title: eventTitle,
@@ -19,7 +23,9 @@ export default function ConfirmationPage() {
       row: "B",
       seat: "B12",
       location: eventLocation,
-      holder: "Umaivanan",
+      holder: userName,
+      phone: userPhone,
+      email: userEmail,
       image: eventImage,
     },
     {
@@ -30,7 +36,9 @@ export default function ConfirmationPage() {
       row: "B",
       seat: "B13",
       location: eventLocation,
-      holder: "Umaivanan",
+      holder: userName,
+      phone: userPhone,
+      email: userEmail,
       image: eventImage,
     },
   ];
@@ -99,6 +107,14 @@ export default function ConfirmationPage() {
                       <div>
                         <p className="text-xs text-gray-400">Name</p>
                         <p className="font-semibold text-gray-800">{ticket.holder}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Phone</p>
+                        <p className="font-semibold text-gray-800">{ticket.phone}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Email</p>
+                        <p className="font-semibold text-gray-800">{ticket.email}</p>
                       </div>
                     </div>
                     <div className="border-t border-gray-100 pt-4 text-center text-sm text-gray-500">
