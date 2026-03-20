@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { useSearchParams } from "next/navigation";
 
+import BookingSteps from "@/components/layout/BookingSteps";
+
 export default function TicketSelection() {
   const [vipCount, setVipCount] = useState(3);
   const [standardCount, setStandardCount] = useState(2);
@@ -23,45 +25,15 @@ export default function TicketSelection() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center justify-center py-10">
-      <section className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-10 border border-gray-200">
-        {/* Stepper Navigation Bar */}
-        <nav className="flex justify-between items-center mb-10" aria-label="Booking Steps">
-          <a href="/ticket-selection" className="flex flex-col items-center group">
-            <div className="bg-blue-100 p-2 rounded-full mb-1 group-hover:bg-blue-200 transition">
-              <span className="text-blue-600 text-xl">🎟️</span>
-            </div>
-            <span className="text-blue-600 font-semibold text-xs group-hover:underline">Select Tickets</span>
-          </a>
-          <div className="w-8 h-1 bg-blue-200 mx-2 rounded" />
-          <a href="/seat-selection" className="flex flex-col items-center group">
-            <div className="bg-gray-100 p-2 rounded-full mb-1 group-hover:bg-gray-200 transition">
-              <span className="text-gray-500 text-xl">🪑</span>
-            </div>
-            <span className="text-gray-500 font-semibold text-xs group-hover:underline">Seat Selection</span>
-          </a>
-          <div className="w-8 h-1 bg-gray-200 mx-2 rounded" />
-          <a href="/details" className="flex flex-col items-center group">
-            <div className="bg-gray-100 p-2 rounded-full mb-1 group-hover:bg-gray-200 transition">
-              <span className="text-gray-500 text-xl">📝</span>
-            </div>
-            <span className="text-gray-500 font-semibold text-xs group-hover:underline">Details</span>
-          </a>
-          <div className="w-8 h-1 bg-gray-200 mx-2 rounded" />
-          <a href="/payment" className="flex flex-col items-center group">
-            <div className="bg-gray-100 p-2 rounded-full mb-1 group-hover:bg-gray-200 transition">
-              <span className="text-gray-500 text-xl">💳</span>
-            </div>
-            <span className="text-gray-500 font-semibold text-xs group-hover:underline">Payment</span>
-          </a>
-          <div className="w-8 h-1 bg-gray-200 mx-2 rounded" />
-          <a href="/confirmation" className="flex flex-col items-center group">
-            <div className="bg-gray-100 p-2 rounded-full mb-1 group-hover:bg-gray-200 transition">
-              <span className="text-gray-500 text-xl">💙</span>
-            </div>
-            <span className="text-gray-500 font-semibold text-xs group-hover:underline">Confirmation</span>
-          </a>
-        </nav>
+    <main
+      className="min-h-screen flex flex-col items-center justify-center py-10 px-4 text-[var(--foreground)]"
+      style={{
+        backgroundColor: "var(--background)",
+        backgroundImage: "var(--glow-gradient)",
+      }}
+    >
+      <section className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
+        <BookingSteps currentStep="/ticket-selection" className="mb-10" />
 
         {/* Event Info */}
         <div className="flex items-center gap-6 mb-8">
@@ -92,9 +64,9 @@ export default function TicketSelection() {
                 <div className="text-gray-500 text-base">(4000 LKR)</div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold hover:bg-gray-300 transition" onClick={() => handleVipChange(-1)}>-</button>
-                <span className="w-10 text-center text-xl font-semibold">{vipCount.toString().padStart(2, '0')}</span>
-                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold hover:bg-gray-300 transition" onClick={() => handleVipChange(1)}>+</button>
+                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold text-black hover:bg-gray-300 transition" onClick={() => handleVipChange(-1)}>-</button>
+                <span className="w-10 text-center text-xl font-semibold text-black">{vipCount.toString().padStart(2, '0')}</span>
+                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold text-black hover:bg-gray-300 transition" onClick={() => handleVipChange(1)}>+</button>
               </div>
             </div>
             <div className="flex items-center justify-between bg-gray-100 rounded-xl p-6 shadow-sm">
@@ -103,9 +75,9 @@ export default function TicketSelection() {
                 <div className="text-gray-500 text-base">(1500 LKR)</div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold hover:bg-gray-300 transition" onClick={() => handleStandardChange(-1)}>-</button>
-                <span className="w-10 text-center text-xl font-semibold">{standardCount.toString().padStart(2, '0')}</span>
-                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold hover:bg-gray-300 transition" onClick={() => handleStandardChange(1)}>+</button>
+                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold text-black hover:bg-gray-300 transition" onClick={() => handleStandardChange(-1)}>-</button>
+                <span className="w-10 text-center text-xl font-semibold text-black">{standardCount.toString().padStart(2, '0')}</span>
+                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold text-black hover:bg-gray-300 transition" onClick={() => handleStandardChange(1)}>+</button>
               </div>
             </div>
           </div>
