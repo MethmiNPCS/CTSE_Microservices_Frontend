@@ -51,7 +51,8 @@ export default function SeatSelectionPage() {
   };
 
   const handleNext = () => {
-    router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
+    const seats = Array.from(selectedSeats).join(",");
+    router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}`);
   };
 
   const maxSeats = totalTickets;
@@ -88,7 +89,7 @@ export default function SeatSelectionPage() {
 
   return (
     <main
-      className="min-h-screen bg-[var(--background)] py-12 text-[var(--foreground)]"
+      className="min-h-screen bg-background py-12 text-foreground"
       style={{ backgroundImage: "var(--glow-gradient)" }}
     >
       <div className="mx-auto w-full max-w-5xl space-y-10 px-4">
