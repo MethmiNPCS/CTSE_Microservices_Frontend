@@ -3,39 +3,37 @@
 import BookingSteps from "@/components/layout/BookingSteps";
 import { useSearchParams } from "next/navigation";
 
-const purchasedTickets = [
-  {
-    title: "Yarl Dreamin'",
-    date: "Nov 15 2025",
-    time: "9:00 PM",
-    zone: "A",
-    row: "B",
-    seat: "B12",
-    location: "Cultural Hall Jaffna",
-    holder: "Umaivanan",
-    image:
-      "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Yarl Dreamin'",
-    date: "Nov 15 2025",
-    time: "9:00 PM",
-    zone: "A",
-    row: "B",
-    seat: "B13",
-    location: "Cultural Hall Jaffna",
-    holder: "Umaivanan",
-    image:
-      "https://images.unsplash.com/photo-1470223991230-32aaa7d6c9b7?auto=format&fit=crop&w=800&q=80",
-  },
-];
-
 export default function ConfirmationPage() {
   const searchParams = useSearchParams();
   const eventTitle = searchParams.get("title") || "Event Title";
   const eventDate = searchParams.get("date") || "Event Date";
   const eventLocation = searchParams.get("location") || "Event Location";
   const eventImage = searchParams.get("image") || "https://images.unsplash.com/photo-1464983953574-0892a7162a1e?auto=format&fit=crop&w=400&q=80";
+
+  const purchasedTickets = [
+    {
+      title: eventTitle,
+      date: eventDate,
+      time: "9:00 PM",
+      zone: "A",
+      row: "B",
+      seat: "B12",
+      location: eventLocation,
+      holder: "Umaivanan",
+      image: eventImage,
+    },
+    {
+      title: eventTitle,
+      date: eventDate,
+      time: "9:00 PM",
+      zone: "A",
+      row: "B",
+      seat: "B13",
+      location: eventLocation,
+      holder: "Umaivanan",
+      image: eventImage,
+    },
+  ];
 
   const handleDownload = () => alert("Downloading ticket...");
   const handleShare = () => alert("Sharing ticket via email...");
