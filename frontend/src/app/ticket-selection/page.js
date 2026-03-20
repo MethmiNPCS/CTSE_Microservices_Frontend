@@ -92,12 +92,21 @@ export default function TicketSelection() {
         </div>
 
         {/* Next Button */}
-        <button
-          className="w-full bg-blue-600 text-white py-4 rounded-xl text-xl font-semibold hover:bg-blue-700 transition"
-          onClick={handleNext}
-        >
-          Next →
-        </button>
+        <div className="flex flex-wrap items-center gap-2 mb-6 mt-4">
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2 rounded-2xl border border-gray-200 px-6 py-3 text-gray-600 transition hover:bg-gray-50"
+          >
+            ← Home
+          </button>
+          <button
+            className="bg-blue-600 text-white py-4 rounded-xl text-xl font-semibold hover:bg-blue-700 transition flex-1"
+            onClick={handleNext}
+          >
+            Next →
+          </button>
+        </div>
       </section>
     </main>
   );
