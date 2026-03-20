@@ -17,17 +17,20 @@ export default function DetailsPage() {
   const eventDate = searchParams.get("date") || "Event Date";
   const eventLocation = searchParams.get("location") || "Event Location";
   const eventImage = searchParams.get("image") || "https://images.unsplash.com/photo-1464983953574-0892a7162a1e?auto=format&fit=crop&w=400&q=80";
+  const vipCount = parseInt(searchParams.get("vipCount")) || 0;
+  const standardCount = parseInt(searchParams.get("standardCount")) || 0;
+  const totalTickets = vipCount + standardCount;
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePrevious = () => router.push(`/seat-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
+  const handlePrevious = () => router.push(`/seat-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    router.push(`/payment?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
+    router.push(`/payment?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
   };
 
   return (

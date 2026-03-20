@@ -30,14 +30,19 @@ export default function PaymentPage() {
   const eventLocation = searchParams.get("location") || "Event Location";
   const eventImage = searchParams.get("image") || "https://images.unsplash.com/photo-1464983953574-0892a7162a1e?auto=format&fit=crop&w=400&q=80";
 
-  const ticketPrice = 3000;
+  const vipCount = parseInt(searchParams.get("vipCount")) || 0;
+  const standardCount = parseInt(searchParams.get("standardCount")) || 0;
+  const totalTickets = vipCount + standardCount;
+  const vipPrice = 4000;
+  const standardPrice = 1500;
+  const ticketPrice = (vipCount * vipPrice) + (standardCount * standardPrice);
   const serviceFee = 100;
   const total = ticketPrice + serviceFee;
 
-  const handlePrevious = () => router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
+  const handlePrevious = () => router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
   const handleSubmit = (event) => {
     event.preventDefault();
-    router.push(`/confirmation?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
+    router.push(`/confirmation?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
   };
 
   return (
@@ -68,8 +73,12 @@ export default function PaymentPage() {
               </div>
               <div className="mt-6 space-y-3 rounded-2xl bg-white p-6 text-sm text-gray-600">
                 <div className="flex items-center justify-between">
-                  <span>Ticket Price (x2)</span>
-                  <span className="font-semibold text-gray-800">{ticketPrice} LKR</span>
+                  <span>VIP Tickets ({vipCount})</span>
+                  <span className="font-semibold text-gray-800">{vipCount * vipPrice} LKR</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Standing Tickets ({standardCount})</span>
+                  <span className="font-semibold text-gray-800">{standardCount * standardPrice} LKR</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Service Fee</span>
