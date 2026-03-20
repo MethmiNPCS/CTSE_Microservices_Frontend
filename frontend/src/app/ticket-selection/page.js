@@ -1,8 +1,8 @@
-
 "use client";
 import { useState } from "react";
 
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import BookingSteps from "@/components/layout/BookingSteps";
 
@@ -10,6 +10,7 @@ export default function TicketSelection() {
   const [vipCount, setVipCount] = useState(3);
   const [standardCount, setStandardCount] = useState(2);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const eventTitle = searchParams.get("title") || "Event Title";
   const eventDate = searchParams.get("date") || "Event Date";
@@ -84,7 +85,14 @@ export default function TicketSelection() {
         </div>
 
         {/* Next Button */}
-        <button className="w-full bg-blue-600 text-white py-4 rounded-xl text-xl font-semibold hover:bg-blue-700 transition">Next →</button>
+        <button
+          className="w-full bg-blue-600 text-white py-4 rounded-xl text-xl font-semibold hover:bg-blue-700 transition"
+          onClick={() => {
+            router.push(`/seat-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
+          }}
+        >
+          Next →
+        </button>
       </section>
     </main>
   );

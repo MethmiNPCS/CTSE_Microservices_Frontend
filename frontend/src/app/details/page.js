@@ -12,17 +12,22 @@ export default function DetailsPage() {
     phone: "",
     email: "",
   });
+  const searchParams = useSearchParams();
+  const eventTitle = searchParams.get("title") || "Event Title";
+  const eventDate = searchParams.get("date") || "Event Date";
+  const eventLocation = searchParams.get("location") || "Event Location";
+  const eventImage = searchParams.get("image") || "https://images.unsplash.com/photo-1464983953574-0892a7162a1e?auto=format&fit=crop&w=400&q=80";
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePrevious = () => router.push("/seat-selection");
+  const handlePrevious = () => router.push(`/seat-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    router.push("/payment");
+    router.push(`/payment?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`);
   };
 
   return (

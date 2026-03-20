@@ -1,6 +1,7 @@
 "use client";
 
 import BookingSteps from "@/components/layout/BookingSteps";
+import { useSearchParams } from "next/navigation";
 
 const purchasedTickets = [
   {
@@ -30,6 +31,12 @@ const purchasedTickets = [
 ];
 
 export default function ConfirmationPage() {
+  const searchParams = useSearchParams();
+  const eventTitle = searchParams.get("title") || "Event Title";
+  const eventDate = searchParams.get("date") || "Event Date";
+  const eventLocation = searchParams.get("location") || "Event Location";
+  const eventImage = searchParams.get("image") || "https://images.unsplash.com/photo-1464983953574-0892a7162a1e?auto=format&fit=crop&w=400&q=80";
+
   const handleDownload = () => alert("Downloading ticket...");
   const handleShare = () => alert("Sharing ticket via email...");
 
