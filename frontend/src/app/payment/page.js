@@ -39,10 +39,14 @@ export default function PaymentPage() {
   const serviceFee = 100;
   const total = ticketPrice + serviceFee;
 
+  const userName = searchParams.get("fullName") || "";
+  const userPhone = searchParams.get("phone") || "";
+  const userEmail = searchParams.get("email") || "";
+
   const handlePrevious = () => router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
   const handleSubmit = (event) => {
     event.preventDefault();
-    router.push(`/confirmation?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
+    router.push(`/confirmation?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}&fullName=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}&email=${encodeURIComponent(userEmail)}`);
   };
 
   return (
