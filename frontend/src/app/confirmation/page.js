@@ -35,7 +35,7 @@ export default function ConfirmationPage() {
 
   return (
     <main
-      className="min-h-screen bg-[var(--background)] py-12 text-[var(--foreground)]"
+      className="min-h-screen bg-background py-12 text-foreground"
       style={{ backgroundImage: "var(--glow-gradient)" }}
     >
       <div className="mx-auto w-full max-w-5xl space-y-10 px-4">
