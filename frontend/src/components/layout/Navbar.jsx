@@ -1,16 +1,25 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import Button from "../ui/Button";
+import { useAuth } from "../../context/AuthContext";
 
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Events", href: "/events" },
-  { label: "My Bookings", href: "/bookings" },
-  { label: "My Reviews", href: "/reviews" },
-  { label: "Profile", href: "/profile" },
 ];
 
 export default function Navbar() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--surface)]/70 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
@@ -39,14 +48,29 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href="/login">
-            <Button variant="secondary" size="sm">
-              Login
-            </Button>
-          </Link>
-          <Link href="/signup">
-            <Button size="sm">Sign Up</Button>
-          </Link>
+          {isLoading ? null : isAuthenticated ? (
+            <>
+              <Link href="/profile">
+                <Button variant="secondary" size="sm">
+                  Profile
+                </Button>
+              </Link>
+              <Button size="sm" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="secondary" size="sm">
+                  Login
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button size="sm">Sign Up</Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

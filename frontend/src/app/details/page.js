@@ -3,8 +3,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import BookingSteps from "@/components/layout/BookingSteps";
-
 export default function DetailsPage() {
   const router = useRouter();
   const [formValues, setFormValues] = useState({
@@ -42,8 +40,6 @@ export default function DetailsPage() {
     >
       <div className="mx-auto w-full max-w-5xl space-y-10">
         <section className="rounded-3xl bg-white/90 p-10 shadow-2xl">
-          <BookingSteps currentStep="/details" className="mb-12" />
-
           <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
             <header className="mb-8">
               <p className="text-sm font-medium text-blue-500">Ticket Details</p>

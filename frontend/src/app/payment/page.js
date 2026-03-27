@@ -2,8 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-import BookingSteps from "@/components/layout/BookingSteps";
 import { useSearchParams } from "next/navigation";
 
 const paymentOptions = [
@@ -57,8 +55,6 @@ export default function PaymentPage() {
     >
       <div className="mx-auto w-full max-w-5xl space-y-10">
         <section className="rounded-3xl bg-white/90 p-10 shadow-2xl">
-          <BookingSteps currentStep="/payment" className="mb-12" />
-
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-6 shadow-inner">
               <div className="flex flex-col gap-4 md:flex-row md:items-center">

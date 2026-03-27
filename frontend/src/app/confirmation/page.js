@@ -1,6 +1,5 @@
 "use client";
 
-import BookingSteps from "@/components/layout/BookingSteps";
 import { useSearchParams } from "next/navigation";
 
 export default function ConfirmationPage() {
@@ -40,8 +39,6 @@ export default function ConfirmationPage() {
     >
       <div className="mx-auto w-full max-w-5xl space-y-10 px-4">
         <section className="rounded-3xl bg-white/90 p-10 shadow-2xl">
-          <BookingSteps currentStep="/confirmation" className="mb-12" />
-
           <div className="rounded-3xl border border-gray-100 bg-white p-10 text-center shadow-sm">
             <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 text-4xl">
               🎉

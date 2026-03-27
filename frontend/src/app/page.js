@@ -1,38 +1,158 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Input from "../components/ui/Input";
 import SectionHeader from "../components/ui/SectionHeader";
 import PageShell from "../components/layout/PageShell";
-import eventsData from "../data/events";
 
-const { events, featuredEventIds, upcomingEventIds } = eventsData;
+const formatEventDate = (dateValue) => {
+  if (!dateValue) {
+    return "Date unavailable";
+  }
 
-const featuredEvents = featuredEventIds
-  .map((id) => events.find((event) => event.id === id))
-  .filter(Boolean);
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) {
+    return "Date unavailable";
+  }
 
-const upcomingEvents = upcomingEventIds
-  .map((id) => events.find((event) => event.id === id))
-  .filter(Boolean);
+  return date.toLocaleString();
+};
 
-const testimonials = [
-  {
-    name: "Ishara P.",
-    quote: "Best booking experience ever. The vibe was unreal.",
-  },
-  {
-    name: "Navin R.",
-    quote: "Found my favorite festival in minutes. Super smooth.",
-  },
-  {
-    name: "Ayesha M.",
-    quote: "The lineup previews and visuals are so hype.",
-  },
-];
+const formatLowestSeatPrice = (seats) => {
+  if (!Array.isArray(seats) || seats.length === 0) {
+    return "Price unavailable";
+  }
+
+  const prices = seats
+    .map((seat) => Number(seat?.price))
+    .filter((price) => Number.isFinite(price));
+
+  if (!prices.length) {
+    return "Price unavailable";
+  }
+
+  return `LKR ${Math.min(...prices).toLocaleString()}+`;
+};
+
+const getEventKey = (event, fallbackIndex, suffix = "") => {
+  const base = event?._id || `${event?.title || "event"}-${event?.start || fallbackIndex}`;
+  return suffix ? `${base}-${suffix}` : base;
+};
 
 export default function Home() {
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const [events, setEvents] = useState([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
+  const [reviews, setReviews] = useState([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true);
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadEvents = async () => {
+      try {
+        setIsLoadingEvents(true);
+        const response = await fetch(`${apiBaseUrl}/events`);
+
+        if (!response.ok) {
+          throw new Error("Failed to load events.");
+        }
+
+        const payload = await response.json();
+        const eventList = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.events)
+            ? payload.events
+            : [];
+
+        if (isMounted) {
+          setEvents(eventList);
+        }
+      } catch {
+        if (isMounted) {
+          setEvents([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingEvents(false);
+        }
+      }
+    };
+
+    loadEvents();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [apiBaseUrl]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadReviews = async () => {
+      try {
+        setIsLoadingReviews(true);
+        const response = await fetch(`${apiBaseUrl}/reviews`);
+        if (!response.ok) {
+          throw new Error("Failed to load reviews.");
+        }
+
+        const payload = await response.json();
+        const reviewList = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload?.reviews)
+              ? payload.reviews
+              : [];
+
+        if (isMounted) {
+          setReviews(reviewList);
+        }
+      } catch {
+        if (isMounted) {
+          setReviews([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingReviews(false);
+        }
+      }
+    };
+
+    loadReviews();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [apiBaseUrl]);
+
+  const sortedEvents = useMemo(() => {
+    return [...events].sort(
+      (left, right) => new Date(left.start).getTime() - new Date(right.start).getTime()
+    );
+  }, [events]);
+
+  const featuredEvents = useMemo(() => sortedEvents.slice(0, 3), [sortedEvents]);
+  const upcomingEvents = useMemo(() => sortedEvents.slice(3, 6), [sortedEvents]);
+  const carouselReviews = useMemo(() => {
+    if (reviews.length <= 3) {
+      return reviews;
+    }
+
+    const items = [];
+    for (let i = 0; i < 3; i += 1) {
+      const nextIndex = (reviewIndex + i) % reviews.length;
+      items.push(reviews[nextIndex]);
+    }
+    return items;
+  }, [reviewIndex, reviews]);
+
   return (
     <div>
       <section className="border-b border-white/10">
@@ -110,19 +230,31 @@ export default function Home() {
             subtitle="Handpicked festivals that sell out fast."
           />
           <div className="grid gap-6 md:grid-cols-3">
-            {featuredEvents.map((event) => (
-              <Card key={event.title} className="space-y-4">
-                <div className="h-40 rounded-2xl bg-[var(--surface-2)]/80" />
+            {isLoadingEvents ? (
+              <Card className="md:col-span-3">
+                <p className="text-sm text-[var(--muted)]">Loading featured events...</p>
+              </Card>
+            ) : null}
+            {featuredEvents.map((event, index) => (
+              <Card key={getEventKey(event, index, "featured")} className="space-y-4">
+                <div
+                  className="h-40 rounded-2xl bg-[var(--surface-2)]/80 bg-cover bg-center"
+                  style={{
+                    backgroundImage: event?.coverImage
+                      ? `url("${event.coverImage}")`
+                      : "none",
+                  }}
+                />
                 <div className="space-y-2">
                   <div className="text-lg font-semibold">{event.title}</div>
                   <div className="text-sm text-[var(--muted)]">
-                    {event.startDate} · {event.location}
+                    {formatEventDate(event.start)} · {event.location}
                   </div>
                   <div className="text-sm font-semibold text-[var(--brand)]">
-                    {event.ticketPrice}
+                    {formatLowestSeatPrice(event.seats)}
                   </div>
                 </div>
-                <Link href={`/events/${event.id}`}>
+                <Link href={`/events/${event._id}`}>
                   <Button size="sm">View Event</Button>
                 </Link>
               </Card>
@@ -140,22 +272,29 @@ export default function Home() {
             "
           />
           <div className="grid gap-6 md:grid-cols-3">
-            {upcomingEvents.map((event) => (
-              <Card key={event.title} className="space-y-4">
-                <div className="h-36 rounded-2xl bg-[var(--surface-2)]/80" />
+            {upcomingEvents.map((event, index) => (
+              <Card key={getEventKey(event, index, "upcoming")} className="space-y-4">
+                <div
+                  className="h-36 rounded-2xl bg-[var(--surface-2)]/80 bg-cover bg-center"
+                  style={{
+                    backgroundImage: event?.coverImage
+                      ? `url("${event.coverImage}")`
+                      : "none",
+                  }}
+                />
                 <div className="space-y-2">
                   <div className="text-lg font-semibold">{event.title}</div>
                   <p className="text-sm text-[var(--muted)]">
                     {event.description}
                   </p>
                   <div className="text-sm text-[var(--muted)]">
-                    {event.startDate} · {event.location}
+                    {formatEventDate(event.start)} · {event.location}
                   </div>
                   <div className="text-sm font-semibold text-[var(--brand)]">
-                    {event.ticketPrice}
+                    {formatLowestSeatPrice(event.seats)}
                   </div>
                 </div>
-                <Link href={`/events/${event.id}`}>
+                <Link href={`/events/${event._id}`}>
                   <Button size="sm" variant="secondary">
                     View Details
                   </Button>
@@ -174,15 +313,22 @@ export default function Home() {
             subtitle="Swipe through the hottest stages right now."
           />
           <div className="flex gap-4 overflow-x-auto pb-2">
-            {featuredEvents.map((event) => (
+            {featuredEvents.map((event, index) => (
               <Card
-                key={`${event.title}-trend`}
+                key={getEventKey(event, index, "trend")}
                 className="min-w-[260px] shrink-0"
               >
-                <div className="h-32 rounded-2xl bg-[var(--surface-2)]/80" />
+                <div
+                  className="h-32 rounded-2xl bg-[var(--surface-2)]/80 bg-cover bg-center"
+                  style={{
+                    backgroundImage: event?.coverImage
+                      ? `url("${event.coverImage}")`
+                      : "none",
+                  }}
+                />
                 <div className="mt-4 text-sm font-semibold">{event.title}</div>
                 <div className="text-xs text-[var(--muted)]">
-                  {event.startDate}
+                  {formatEventDate(event.start)}
                 </div>
               </Card>
             ))}
@@ -239,14 +385,59 @@ export default function Home() {
             title="What the crowd says"
             subtitle="Real fans. Real feedback."
           />
+          {!isLoadingReviews && reviews.length > 3 ? (
+            <div className="flex items-center justify-end gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                onClick={() =>
+                  setReviewIndex((current) =>
+                    current === 0 ? reviews.length - 1 : current - 1
+                  )
+                }
+              >
+                Prev
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                onClick={() =>
+                  setReviewIndex((current) => (current + 1) % reviews.length)
+                }
+              >
+                Next
+              </Button>
+            </div>
+          ) : null}
           <div className="grid gap-6 md:grid-cols-3">
-            {testimonials.map((review) => (
-              <Card key={review.name} className="space-y-3">
-                <div className="text-sm text-[var(--muted)]">★★★★★</div>
-                <p className="text-sm">{review.quote}</p>
-                <div className="text-xs font-semibold">{review.name}</div>
+            {isLoadingReviews ? (
+              <Card className="md:col-span-3">
+                <p className="text-sm text-[var(--muted)]">Loading reviews...</p>
               </Card>
-            ))}
+            ) : null}
+            {!isLoadingReviews && reviews.length === 0 ? (
+              <Card className="md:col-span-3">
+                <p className="text-sm text-[var(--muted)]">
+                  No reviews available right now.
+                </p>
+              </Card>
+            ) : null}
+            {!isLoadingReviews
+              ? carouselReviews.map((review, index) => (
+                  <Card
+                    key={review.review_id || review._id || review.id || `home-review-${index}`}
+                    className="space-y-3"
+                  >
+                    <div className="text-sm text-[var(--muted)]">
+                      {"★".repeat(Number(review.rating) || 0)}
+                    </div>
+                    <p className="text-sm">{review.comment}</p>
+                    <div className="text-xs font-semibold">{review.user_name}</div>
+                  </Card>
+                ))
+              : null}
           </div>
         </PageShell>
       </section>

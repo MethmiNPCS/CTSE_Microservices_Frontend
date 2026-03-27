@@ -1,44 +1,72 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 import Card from "../../components/ui/Card";
 import PageShell from "../../components/layout/PageShell";
 import SectionHeader from "../../components/ui/SectionHeader";
 
-const bookings = [
-  {
-    customerName: "Ishara Perera",
-    email: "ishara@example.com",
-    phoneNumber: "+94 77 123 4567",
-    eventId: "neon-river",
-    eventName: "Neon River Festival",
-    ticketPrice: "$45",
-    bookingDate: "Aug 10, 2026",
-    bookingTime: "19:30",
-    status: "Confirmed",
-  },
-  {
-    customerName: "Navin Rodrigo",
-    email: "navin@example.com",
-    phoneNumber: "+94 71 987 6543",
-    eventId: "skyline-soundscape",
-    eventName: "Skyline Soundscape",
-    ticketPrice: "$60",
-    bookingDate: "Aug 15, 2026",
-    bookingTime: "18:00",
-    status: "Confirmed",
-  },
-  {
-    customerName: "Ayesha Malik",
-    email: "ayesha@example.com",
-    phoneNumber: "+94 76 555 8899",
-    eventId: "midnight-mango",
-    eventName: "Midnight Mango",
-    ticketPrice: "$52",
-    bookingDate: "Aug 18, 2026",
-    bookingTime: "21:00",
-    status: "Cancelled",
-  },
-];
-
 export default function BookingsPage() {
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const [bookings, setBookings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadBookings = async () => {
+      const token = window.localStorage.getItem("authToken");
+      if (!token) {
+        if (isMounted) {
+          setBookings([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+        const response = await fetch(`${apiBaseUrl}/bookings`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch bookings.");
+        }
+
+        const payload = await response.json();
+        const items = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.bookings)
+            ? payload.bookings
+            : [];
+        if (isMounted) {
+          setBookings(items);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setBookings([]);
+          setErrorMessage(error.message || "Failed to fetch bookings.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadBookings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [apiBaseUrl]);
+
   return (
     <PageShell className="space-y-8">
       <SectionHeader
@@ -48,23 +76,35 @@ export default function BookingsPage() {
       />
 
       <div className="grid gap-6">
+        {isLoading ? (
+          <Card>
+            <p className="text-sm text-[var(--muted)]">Loading bookings...</p>
+          </Card>
+        ) : null}
+        {!isLoading && errorMessage ? (
+          <Card>
+            <p className="text-sm text-red-400">{errorMessage}</p>
+          </Card>
+        ) : null}
+        {!isLoading && !errorMessage && bookings.length === 0 ? (
+          <Card>
+            <p className="text-sm text-[var(--muted)]">No bookings found.</p>
+          </Card>
+        ) : null}
         {bookings.map((booking) => (
-          <Card key={`${booking.eventId}-${booking.email}`} className="space-y-4">
+          <Card
+            key={booking.booking_id || `${booking.event_id}-${booking.email}`}
+            className="space-y-4"
+          >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <div className="text-lg font-semibold">{booking.eventName}</div>
+                <div className="text-lg font-semibold">{booking.event_name}</div>
                 <div className="text-sm text-[var(--muted)]">
-                  Event ID: {booking.eventId}
+                  Event ID: {booking.event_id}
                 </div>
               </div>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  booking.status === "Confirmed"
-                    ? "bg-green-500/15 text-green-400"
-                    : "bg-red-500/15 text-red-400"
-                }`}
-              >
-                {booking.status}
+              <span className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-semibold text-green-400">
+                Confirmed
               </span>
             </div>
 
@@ -72,7 +112,7 @@ export default function BookingsPage() {
               <div>
                 <div className="text-xs uppercase tracking-[0.2em]">Customer</div>
                 <div className="text-sm text-[var(--foreground)]">
-                  {booking.customerName}
+                  {booking.customer_name}
                 </div>
               </div>
               <div>
@@ -84,25 +124,27 @@ export default function BookingsPage() {
               <div>
                 <div className="text-xs uppercase tracking-[0.2em]">Phone</div>
                 <div className="text-sm text-[var(--foreground)]">
-                  {booking.phoneNumber}
+                  {booking.phone_number}
                 </div>
               </div>
               <div>
                 <div className="text-xs uppercase tracking-[0.2em]">Ticket Price</div>
                 <div className="text-sm text-[var(--foreground)]">
-                  {booking.ticketPrice}
+                  LKR {Number(booking.ticket_price || 0).toLocaleString()}
                 </div>
               </div>
               <div>
                 <div className="text-xs uppercase tracking-[0.2em]">Booking Date</div>
                 <div className="text-sm text-[var(--foreground)]">
-                  {booking.bookingDate}
+                  {booking.booking_date
+                    ? new Date(booking.booking_date).toLocaleDateString()
+                    : "-"}
                 </div>
               </div>
               <div>
                 <div className="text-xs uppercase tracking-[0.2em]">Booking Time</div>
                 <div className="text-sm text-[var(--foreground)]">
-                  {booking.bookingTime}
+                  {booking.booking_time || "-"}
                 </div>
               </div>
             </div>

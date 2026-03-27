@@ -3,38 +3,82 @@ import { notFound } from "next/navigation";
 
 import Button from "../../../components/ui/Button";
 import Card from "../../../components/ui/Card";
-import Input from "../../../components/ui/Input";
 import SectionHeader from "../../../components/ui/SectionHeader";
 import PageShell from "../../../components/layout/PageShell";
-import BookingModal from "../../../components/events/BookingModal";
-import eventsData from "../../../data/events";
+import EventReviewsSection from "../../../components/events/EventReviewsSection";
 
-const { events } = eventsData;
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
-const reviews = [
-  {
-    name: "Ishara P.",
-    rating: 5,
-    comment: "The lighting and sound were absolutely unreal.",
-    date: "Aug 12, 2026",
-  },
-  {
-    name: "Navin R.",
-    rating: 4,
-    comment: "Easy entry and great crowd energy the entire night.",
-    date: "Aug 14, 2026",
-  },
-];
+const formatDateTime = (value) => {
+  if (!value) {
+    return "Date unavailable";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Date unavailable";
+  }
+
+  return date.toLocaleString();
+};
+
+const formatPrice = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) {
+    return "Price unavailable";
+  }
+  return `LKR ${amount.toLocaleString()}`;
+};
+
+const findLowestSeatPrice = (seats) => {
+  if (!Array.isArray(seats) || seats.length === 0) {
+    return "Price unavailable";
+  }
+
+  const prices = seats
+    .map((seat) => Number(seat?.price))
+    .filter((price) => Number.isFinite(price));
+
+  if (!prices.length) {
+    return "Price unavailable";
+  }
+
+  return `LKR ${Math.min(...prices).toLocaleString()}`;
+};
 
 export default async function EventDetailPage({ params }) {
   const { id } = await params;
-  const event = events.find((item) => item.id === id);
+
+  const eventResponse = await fetch(`${apiBaseUrl}/events/${id}`, {
+    cache: "no-store",
+  });
+
+  if (!eventResponse.ok) {
+    notFound();
+  }
+
+  const eventPayload = await eventResponse.json();
+  const event = eventPayload?.event || eventPayload;
 
   if (!event) {
     notFound();
   }
 
-  const relatedEvents = events.filter((item) => item.id !== event.id).slice(0, 3);
+  let relatedEvents = [];
+  try {
+    const eventsResponse = await fetch(`${apiBaseUrl}/events`, {
+      cache: "no-store",
+    });
+    if (eventsResponse.ok) {
+      const eventsPayload = await eventsResponse.json();
+      const allEvents = Array.isArray(eventsPayload)
+        ? eventsPayload
+        : Array.isArray(eventsPayload?.events)
+          ? eventsPayload.events
+          : [];
+      relatedEvents = allEvents.filter((item) => item?._id !== event._id).slice(0, 3);
+    }
+  } catch {}
 
   return (
     <div>
@@ -52,12 +96,12 @@ export default async function EventDetailPage({ params }) {
             </p>
             <div className="flex flex-wrap gap-3 text-sm text-[var(--muted)]">
               <span>
-                {event.startDate} · {event.endDate}
+                {formatDateTime(event.start)} · {formatDateTime(event.end)}
               </span>
               <span>· {event.location}</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {event.tags.map((tag) => (
+              {(event.tags || []).map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-[var(--muted)]"
@@ -67,7 +111,9 @@ export default async function EventDetailPage({ params }) {
               ))}
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Link href={`/ticket-selection?title=${encodeURIComponent(event.title)}&date=${encodeURIComponent(event.startDate)}&location=${encodeURIComponent(event.location)}&image=${encodeURIComponent(event.galleryImages?.[0] || '')}`}>
+              <Link
+                href={`/ticket-selection?title=${encodeURIComponent(event.title)}&date=${encodeURIComponent(formatDateTime(event.start))}&location=${encodeURIComponent(event.location)}&image=${encodeURIComponent(event.galleryImages?.[0] || event.coverImage || "")}`}
+              >
                 <Button variant="primary" size="lg">
                   Book Tickets
                 </Button>
@@ -77,20 +123,27 @@ export default async function EventDetailPage({ params }) {
               </Button>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[var(--surface-2)]/80 p-6">
+          <div
+            className="relative min-h-[280px] overflow-hidden rounded-[32px] border border-white/10 bg-[var(--surface-2)]/80 bg-cover bg-center p-6"
+            style={{
+              backgroundImage: event?.coverImage
+                ? `url("${event.coverImage}")`
+                : undefined,
+            }}
+          >
             <div
-              className="absolute inset-0"
-              style={{ backgroundImage: "var(--hero-gradient)", opacity: 0.25 }}
+              className="absolute inset-0 bg-[var(--surface-2)]/40"
+              style={{ backgroundImage: "var(--hero-gradient)", opacity: 0.55 }}
             />
-            <div className="relative flex h-full items-end">
-              <div className="space-y-2">
-                <div className="text-xs uppercase tracking-[0.35em] text-white/70">
+            <div className="relative flex h-full min-h-[220px] items-end">
+              <div className="space-y-2 drop-shadow-md">
+                <div className="text-xs uppercase tracking-[0.35em] text-white/90">
                   From
                 </div>
                 <div className="text-3xl font-semibold text-white">
-                  {event.ticketPrice}
+                  {findLowestSeatPrice(event.seats)}
                 </div>
-                <div className="text-sm text-white/70">
+                <div className="text-sm text-white/85">
                   Starts at general admission
                 </div>
               </div>
@@ -107,10 +160,13 @@ export default async function EventDetailPage({ params }) {
             subtitle="Swipe through the visual vibe before you book."
           />
           <div className="grid gap-4 md:grid-cols-3">
-            {event.galleryImages.map((label) => (
-              <Card key={label} className="space-y-3">
-                <div className="h-40 rounded-2xl bg-[var(--surface-2)]/80" />
-                <div className="text-sm font-semibold">{label}</div>
+            {(event.galleryImages || []).map((imageUrl, index) => (
+              <Card key={`${imageUrl}-${index}`} className="overflow-hidden p-0">
+                <img
+                  src={imageUrl}
+                  alt={`${event.title} gallery ${index + 1}`}
+                  className="h-48 w-full object-cover"
+                />
               </Card>
             ))}
           </div>
@@ -147,7 +203,7 @@ export default async function EventDetailPage({ params }) {
                       <td className="px-4 py-3">{seat.row}</td>
                       <td className="px-4 py-3">{seat.column}</td>
                       <td className="px-4 py-3">{seat.seatNumber}</td>
-                      <td className="px-4 py-3">${seat.price}</td>
+                      <td className="px-4 py-3">{formatPrice(seat.price)}</td>
                       <td className="px-4 py-3 capitalize">
                         {seat.bookingStatus}
                       </td>
@@ -172,13 +228,20 @@ export default async function EventDetailPage({ params }) {
           />
           <div className="grid gap-6 md:grid-cols-3">
             {relatedEvents.map((item) => (
-              <Card key={item.id} className="space-y-3">
-                <div className="h-32 rounded-2xl bg-[var(--surface-2)]/80" />
+              <Card key={item._id} className="space-y-3">
+                <div
+                  className="h-32 rounded-2xl bg-[var(--surface-2)]/80 bg-cover bg-center"
+                  style={{
+                    backgroundImage: item?.coverImage
+                      ? `url("${item.coverImage}")`
+                      : "none",
+                  }}
+                />
                 <div className="text-base font-semibold">{item.title}</div>
                 <div className="text-sm text-[var(--muted)]">
-                  {item.startDate} · {item.location}
+                  {formatDateTime(item.start)} · {item.location}
                 </div>
-                <Link href={`/events/${item.id}`}>
+                <Link href={`/events/${item._id}`}>
                   <Button size="sm">View Event</Button>
                 </Link>
               </Card>
@@ -187,45 +250,7 @@ export default async function EventDetailPage({ params }) {
         </PageShell>
       </section>
 
-      <section className="border-t border-white/10 bg-[var(--surface)]/50">
-        <PageShell className="space-y-8">
-          <SectionHeader
-            eyebrow="Reviews"
-            title="Review the experience"
-            subtitle="Share your thoughts with the community."
-          />
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="space-y-4">
-              {reviews.map((review) => (
-                <Card key={review.name} className="space-y-2">
-                  <div className="text-sm text-[var(--muted)]">
-                    {"★".repeat(review.rating)}
-                  </div>
-                  <p className="text-sm">{review.comment}</p>
-                  <div className="text-xs text-[var(--muted)]">
-                    {review.name} · {review.date}
-                  </div>
-                </Card>
-              ))}
-            </div>
-            <Card className="space-y-4">
-              <div className="text-sm uppercase tracking-[0.3em] text-[var(--brand-2)]">
-                Add Review
-              </div>
-              <div className="space-y-3">
-                <Input placeholder="Your name" />
-                <Input placeholder="Email" />
-                <Input placeholder="Rating (1-5)" />
-                <textarea
-                  className="min-h-[120px] w-full rounded-2xl border border-white/10 bg-[var(--surface)]/80 px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-                  placeholder="Write your review"
-                />
-              </div>
-              <Button>Submit Review</Button>
-            </Card>
-          </div>
-        </PageShell>
-      </section>
+      <EventReviewsSection eventId={id} eventName={event.title} />
     </div>
   );
 }

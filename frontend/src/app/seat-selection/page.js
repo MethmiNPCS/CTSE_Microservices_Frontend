@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import BookingSteps from "@/components/layout/BookingSteps";
-
 const seatRows = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 const seatsPerRow = 11;
 const reservedSeats = new Set(["D6", "D7", "D8", "E5", "F5", "G5"]);
@@ -100,8 +98,6 @@ export default function SeatSelectionPage() {
     >
       <div className="mx-auto w-full max-w-5xl space-y-10 px-4">
         <section className="w-full rounded-3xl bg-white/90 p-10 shadow-2xl">
-          <BookingSteps currentStep="/seat-selection" className="mb-10" />
-
           <div className="mb-8 flex flex-wrap gap-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <img
               src={eventImage}

@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
-import BookingSteps from "@/components/layout/BookingSteps";
-
 export default function TicketSelection() {
   const [vipCount, setVipCount] = useState(3);
   const [standardCount, setStandardCount] = useState(2);
@@ -41,8 +39,6 @@ export default function TicketSelection() {
       }}
     >
       <section className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
-        <BookingSteps currentStep="/ticket-selection" className="mb-10" />
-
         {/* Event Info */}
         <div className="flex items-center gap-6 mb-8">
           <img src={eventImage} alt="event" className="w-32 h-32 rounded-xl object-cover border border-gray-200 shadow-sm" />

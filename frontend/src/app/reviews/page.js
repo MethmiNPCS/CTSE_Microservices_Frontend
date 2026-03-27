@@ -1,331 +1,405 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import SectionHeader from "../../components/ui/SectionHeader";
 import PageShell from "../../components/layout/PageShell";
-
-const myReviews = [
-  {
-    id: "review-001",
-    eventName: "Neon River Festival",
-    eventId: "neon-river",
-    rating: 5,
-    date: "Aug 12, 2026",
-    comment: "Insane light work and the crowd was electric all night.",
-    status: "Published",
-  },
-  {
-    id: "review-002",
-    eventName: "Skyline Soundscape",
-    eventId: "skyline-soundscape",
-    rating: 4,
-    date: "Aug 16, 2026",
-    comment: "Great set list and visuals, entry line moved fast.",
-    status: "Published",
-  },
-  {
-    id: "review-003",
-    eventName: "Midnight Mango",
-    eventId: "midnight-mango",
-    rating: 3,
-    date: "Aug 20, 2026",
-    comment: "Loved the vibe, wish the sound was a bit louder.",
-    status: "Draft",
-  },
-];
-
-const emptyForm = {
-  eventName: "",
-  eventId: "",
-  rating: 0,
-  date: "",
-  comment: "",
-  status: "Draft",
-};
-
-const selectClassName =
-  "w-full rounded-2xl border border-black/15 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring)]";
+import { useAuth } from "../../context/AuthContext";
 
 const cardClassName =
   "border-black/10 bg-white/85 shadow-[0_22px_45px_-30px_rgba(15,23,42,0.35)]";
-const fieldClassName =
-  "border-black/15 bg-white text-slate-900 placeholder:text-slate-500 shadow-sm";
+
+const formatDate = (value) => {
+  if (!value) {
+    return "—";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+  return date.toLocaleString();
+};
+
+const getReviewId = (review) =>
+  review.review_id || review._id || review.id || "";
 
 export default function ReviewsPage() {
-  const [reviews, setReviews] = useState(myReviews);
-  const [form, setForm] = useState(emptyForm);
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const { user, token, isLoading: authLoading } = useAuth();
+  const [reviews, setReviews] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ rating: "5", comment: "" });
+  const [actionError, setActionError] = useState("");
+  const [savingId, setSavingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
-  };
+  const userId = user?.id;
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const normalizedRating = Math.min(
-      5,
-      Math.max(1, Number.parseInt(form.rating || 0, 10))
-    );
-    const payload = {
-      ...form,
-      rating: normalizedRating || 1,
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadReviews = async () => {
+      if (authLoading) {
+        return;
+      }
+
+      if (!token || !userId) {
+        if (isMounted) {
+          setReviews([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+        const response = await fetch(`${apiBaseUrl}/reviews/user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.status === 404) {
+          if (isMounted) {
+            setReviews([]);
+          }
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Failed to load your reviews.");
+        }
+
+        const payload = await response.json();
+        const items = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.reviews)
+            ? payload.reviews
+            : [];
+
+        if (isMounted) {
+          setReviews(items);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setReviews([]);
+          setErrorMessage(error.message || "Failed to load reviews.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     };
 
-    if (editingId) {
-      setReviews((current) =>
-        current.map((review) =>
-          review.id === editingId ? { ...review, ...payload } : review
-        )
-      );
-    } else {
-      setReviews((current) => [
-        {
-          id: `review-${Date.now()}`,
-          ...payload,
-        },
-        ...current,
-      ]);
-    }
+    loadReviews();
 
-    setForm(emptyForm);
-    setEditingId(null);
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [apiBaseUrl, authLoading, token, userId]);
+
+  const buildUpdatePayload = (review, rating, comment) => ({
+    user_id: user?.id,
+    user_name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || review.user_name,
+    email: user?.email || review.email,
+    event_id: review.event_id,
+    event_name: review.event_name,
+    rating,
+    comment,
+  });
 
   const startEdit = (review) => {
-    setEditingId(review.id);
-    setForm({
-      eventName: review.eventName,
-      eventId: review.eventId,
-      rating: review.rating,
-      date: review.date,
-      comment: review.comment,
-      status: review.status,
+    const id = getReviewId(review);
+    if (!id) {
+      return;
+    }
+    setActionError("");
+    setEditingId(id);
+    setEditForm({
+      rating: String(Number(review.rating) || 1),
+      comment: review.comment || "",
     });
   };
 
-  const removeReview = (reviewId) => {
-    setReviews((current) => current.filter((review) => review.id !== reviewId));
-    if (editingId === reviewId) {
-      setEditingId(null);
-      setForm(emptyForm);
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm({ rating: "5", comment: "" });
+    setActionError("");
+  };
+
+  const handleUpdate = async (review) => {
+    const reviewId = getReviewId(review);
+    if (!reviewId || !token || !user) {
+      setActionError("Unable to update review.");
+      return;
+    }
+
+    const rating = Number.parseInt(editForm.rating, 10);
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      setActionError("Rating must be between 1 and 5.");
+      return;
+    }
+
+    setSavingId(reviewId);
+    setActionError("");
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/reviews/${reviewId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(buildUpdatePayload(review, rating, editForm.comment)),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.message || "Failed to update review.");
+      }
+
+      setReviews((current) =>
+        current.map((item) =>
+          getReviewId(item) === reviewId ? { ...item, ...payload, rating, comment: editForm.comment } : item
+        )
+      );
+      cancelEdit();
+    } catch (error) {
+      setActionError(error.message || "Failed to update review.");
+    } finally {
+      setSavingId(null);
     }
   };
 
-  const toggleStatus = (reviewId) => {
-    setReviews((current) =>
-      current.map((review) =>
-        review.id === reviewId
-          ? {
-              ...review,
-              status: review.status === "Published" ? "Draft" : "Published",
-            }
-          : review
-      )
-    );
+  const handleDelete = async (review) => {
+    const reviewId = getReviewId(review);
+    if (!reviewId || !token) {
+      return;
+    }
+    if (!window.confirm("Delete this review? This cannot be undone.")) {
+      return;
+    }
+
+    setDeletingId(reviewId);
+    setActionError("");
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/reviews/${reviewId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload?.message || "Failed to delete review.");
+      }
+
+      setReviews((current) => current.filter((item) => getReviewId(item) !== reviewId));
+      if (editingId === reviewId) {
+        cancelEdit();
+      }
+    } catch (error) {
+      setActionError(error.message || "Failed to delete review.");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
-  const resetForm = () => {
-    setForm(emptyForm);
-    setEditingId(null);
-  };
+  const stats = useMemo(() => {
+    const total = reviews.length;
+    const avgRating =
+      total > 0
+        ? (
+            reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / total
+          ).toFixed(1)
+        : "0.0";
+    return { total, avgRating };
+  }, [reviews]);
+
+  if (!authLoading && !token) {
+    return (
+      <PageShell className="space-y-8">
+        <SectionHeader
+          eyebrow="Reviews"
+          title="My reviews"
+          subtitle="Sign in to see reviews you have submitted."
+        />
+        <Card className={cardClassName}>
+          <p className="text-sm text-[var(--muted)]">
+            You need to be logged in to view your reviews.
+          </p>
+          <Link href="/login" className="mt-4 inline-block">
+            <Button>Go to login</Button>
+          </Link>
+        </Card>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell className="space-y-10">
       <SectionHeader
         eyebrow="Review service"
         title="My reviews"
-        subtitle="Manage your feedback, ratings, and status updates."
+        subtitle="Reviews you have submitted for events."
       />
+
+      {isLoading ? (
+        <Card className={`text-sm text-[var(--muted)] ${cardClassName}`}>
+          Loading your reviews...
+        </Card>
+      ) : null}
+
+      {!isLoading && errorMessage ? (
+        <Card className={`text-sm text-red-400 ${cardClassName}`}>
+          {errorMessage}
+        </Card>
+      ) : null}
+
+      {!isLoading && !errorMessage && reviews.length === 0 ? (
+        <Card className={`text-sm text-[var(--muted)] ${cardClassName}`}>
+          No reviews yet. Submit a review from an event page.
+        </Card>
+      ) : null}
+
+      {actionError ? (
+        <Card className={`text-sm text-red-400 ${cardClassName}`}>{actionError}</Card>
+      ) : null}
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-4">
-          {reviews.length === 0 ? (
-            <Card className={`text-sm text-[var(--muted)] ${cardClassName}`}>
-              No reviews yet. Create your first review to see it here.
-            </Card>
-          ) : null}
+          {reviews.map((review, index) => {
+            const rid = getReviewId(review);
+            const isEditing = editingId === rid;
 
-          {reviews.map((review) => (
-            <Card key={review.id} className={`space-y-3 ${cardClassName}`}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="text-lg font-semibold">{review.eventName}</div>
-                  <div className="text-xs text-[var(--muted)]">
-                    Event ID: {review.eventId}
-                  </div>
-                </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    review.status === "Published"
-                      ? "bg-green-500/15 text-green-400"
-                      : "bg-amber-500/15 text-amber-400"
-                  }`}
-                >
-                  {review.status}
-                </span>
-              </div>
-              <div className="text-sm text-[var(--muted)]">
-                {"★".repeat(review.rating)}
-              </div>
-              <p className="text-sm">{review.comment}</p>
-              <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--muted)]">
-                <span>{review.date}</span>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => startEdit(review)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => toggleStatus(review.id)}
-                  >
-                    {review.status === "Published" ? "Unpublish" : "Publish"}
-                  </Button>
-                  <Button size="sm" onClick={() => removeReview(review.id)}>
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        <div className="space-y-6">
-          <Card className={`space-y-4 ${cardClassName}`}>
-            <div className="text-xs uppercase tracking-[0.3em] text-[var(--brand-2)]">
-              {editingId ? "Edit review" : "New review"}
-            </div>
-            <form className="space-y-3" onSubmit={handleSubmit}>
-              <Input
-                name="eventName"
-                value={form.eventName}
-                onChange={handleChange}
-                placeholder="Event name"
-                className={fieldClassName}
-                required
-              />
-              <Input
-                name="eventId"
-                value={form.eventId}
-                onChange={handleChange}
-                placeholder="Event ID"
-                className={fieldClassName}
-                required
-              />
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-                    Rating
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {[1, 2, 3, 4, 5].map((value) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() =>
-                          setForm((current) => ({
-                            ...current,
-                            rating: value,
-                          }))
-                        }
-                        className={`text-2xl leading-none transition ${
-                          value <= form.rating
-                            ? "text-[var(--brand-2)]"
-                            : "text-black/30"
-                        } hover:text-[var(--brand-2)]`}
-                        aria-pressed={value <= form.rating}
-                        aria-label={`${value} star${value > 1 ? "s" : ""}`}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <Input
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  placeholder="Review date"
-                  className={fieldClassName}
-                  required
-                />
-              </div>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className={selectClassName}
+            return (
+              <Card
+                key={rid || `review-${index}`}
+                className={`space-y-3 ${cardClassName}`}
               >
-                <option value="Draft">Draft</option>
-                <option value="Published">Published</option>
-              </select>
-              <textarea
-                name="comment"
-                value={form.comment}
-                onChange={handleChange}
-                className="min-h-[140px] w-full rounded-2xl border border-black/15 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-                placeholder="Write your review"
-                required
-              />
-              <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="secondary" onClick={resetForm}>
-                  Reset
-                </Button>
-                <Button type="submit">
-                  {editingId ? "Update Review" : "Create Review"}
-                </Button>
-              </div>
-            </form>
-          </Card>
-
-          <Card className={`space-y-3 ${cardClassName}`}>
-            <div className="text-xs uppercase tracking-[0.3em] text-[var(--brand-2)]">
-              Review stats
-            </div>
-            <div className="grid gap-3 text-sm text-[var(--muted)] sm:grid-cols-2">
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Total</div>
-                <div className="text-base text-[var(--foreground)]">
-                  {reviews.length}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="text-lg font-semibold">{review.event_name}</div>
+                    <div className="text-xs text-[var(--muted)]">
+                      Event ID: {review.event_id}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link href={`/events/${review.event_id}`}>
+                      <Button size="sm" variant="secondary">
+                        View event
+                      </Button>
+                    </Link>
+                    {isEditing ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          type="button"
+                          onClick={cancelEdit}
+                          disabled={savingId === rid}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => handleUpdate(review)}
+                          disabled={savingId === rid}
+                        >
+                          {savingId === rid ? "Saving..." : "Save"}
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          type="button"
+                          onClick={() => startEdit(review)}
+                          disabled={Boolean(deletingId) || Boolean(savingId)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => handleDelete(review)}
+                          disabled={deletingId === rid || Boolean(savingId)}
+                        >
+                          {deletingId === rid ? "Deleting..." : "Delete"}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Published</div>
-                <div className="text-base text-[var(--foreground)]">
-                  {reviews.filter((review) => review.status === "Published").length}
+                {isEditing ? (
+                  <div className="space-y-3">
+                    <Input
+                      type="number"
+                      min="1"
+                      max="5"
+                      name="rating"
+                      value={editForm.rating}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, rating: e.target.value }))
+                      }
+                    />
+                    <textarea
+                      name="comment"
+                      value={editForm.comment}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, comment: e.target.value }))
+                      }
+                      className="min-h-[100px] w-full rounded-2xl border border-black/15 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                      placeholder="Your comment"
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-sm text-[var(--muted)]">
+                      {"★".repeat(Number(review.rating) || 0)}
+                    </div>
+                    <p className="text-sm">{review.comment}</p>
+                  </>
+                )}
+                <div className="text-xs text-[var(--muted)]">
+                  {formatDate(review.createdAt)}
                 </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Drafts</div>
-                <div className="text-base text-[var(--foreground)]">
-                  {reviews.filter((review) => review.status === "Draft").length}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Avg rating</div>
-                <div className="text-base text-[var(--foreground)]">
-                  {reviews.length
-                    ? (
-                        reviews.reduce(
-                          (total, review) => total + review.rating,
-                          0
-                        ) / reviews.length
-                      ).toFixed(1)
-                    : "0.0"}
-                </div>
-              </div>
-            </div>
-          </Card>
+              </Card>
+            );
+          })}
         </div>
+
+        <Card className={`space-y-3 ${cardClassName}`}>
+          <div className="text-xs uppercase tracking-[0.3em] text-[var(--brand-2)]">
+            Review stats
+          </div>
+          <div className="grid gap-3 text-sm text-[var(--muted)] sm:grid-cols-2">
+            <div>
+              <div className="text-xs uppercase tracking-[0.2em]">Total</div>
+              <div className="text-base text-[var(--foreground)]">{stats.total}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-[0.2em]">Avg rating</div>
+              <div className="text-base text-[var(--foreground)]">
+                {stats.avgRating}
+              </div>
+            </div>
+          </div>
+        </Card>
       </section>
     </PageShell>
   );
