@@ -13,7 +13,7 @@ export default function SectionHeader({
           {eyebrow}
         </div>
       ) : null}
-      <h2 className="text-2xl font-semibold text-[var(--foreground)] sm:text-3xl">
+      <h2 className="text-3xl font-bold text-white sm:text-4xl">
         {title}
       </h2>
       {subtitle ? (

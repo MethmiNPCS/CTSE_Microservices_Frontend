@@ -6,19 +6,19 @@ export default function Button({
   ...props
 }) {
   const base =
-    "inline-flex items-center justify-center rounded-full font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#206eaa] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] disabled:cursor-not-allowed disabled:opacity-60 hover:-translate-y-0.5";
 
   const variants = {
-    primary: "bg-[var(--brand)] text-white hover:brightness-110",
+    primary: "bg-gradient-to-br from-[#206eaa] to-[#1a5a8f] text-white hover:from-[#1a5a8f] hover:to-[#0f3d5c] hover:shadow-xl hover:shadow-[#206eaa]/30 active:scale-95 active:translate-y-1 relative overflow-hidden before:absolute before:inset-0 before:bg-white before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300",
     secondary:
-      "border border-white/10 bg-[var(--surface)]/70 text-[var(--foreground)] hover:bg-[var(--surface-2)]",
-    ghost: "text-[var(--foreground)] hover:bg-white/5",
+      "border-2 border-[#206eaa] bg-transparent text-[#206eaa] hover:bg-[#206eaa]/10 hover:shadow-lg hover:shadow-[#206eaa]/20 hover:border-[#1a5a8f] active:scale-95 active:translate-y-1",
+    ghost: "text-[var(--foreground)] hover:bg-[#206eaa]/10 active:bg-[#206eaa]/20 hover:shadow-md hover:shadow-[#206eaa]/10",
   };
 
   const sizes = {
-    sm: "px-3 py-1.5 text-xs",
-    md: "px-4 py-2 text-sm",
-    lg: "px-5 py-2.5 text-base",
+    sm: "px-3.5 py-2 text-xs",
+    md: "px-5 py-2.5 text-sm",
+    lg: "px-6 py-3 text-base",
   };
 
   const variantClass = variants[variant] || variants.primary;

@@ -6,6 +6,7 @@ import Card from "../../../components/ui/Card";
 import SectionHeader from "../../../components/ui/SectionHeader";
 import PageShell from "../../../components/layout/PageShell";
 import EventReviewsSection from "../../../components/events/EventReviewsSection";
+import TheatreSeatingMap from "../../../components/events/TheatreSeatingMap";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -76,75 +77,98 @@ export default async function EventDetailPage({ params }) {
         : Array.isArray(eventsPayload?.events)
           ? eventsPayload.events
           : [];
-      relatedEvents = allEvents.filter((item) => item?._id !== event._id).slice(0, 3);
+      
+      // Get current time for filtering past events
+      const now = new Date();
+      
+      // Filter: exclude current event, exclude past events, optionally match tags
+      relatedEvents = allEvents
+        .filter((item) => item?._id !== event._id) // exclude current event
+        .filter((item) => {
+          // exclude past events (end time is before now)
+          const itemEndDate = new Date(item?.end);
+          return itemEndDate > now;
+        })
+        .filter((item) => {
+          // prefer events with matching tags
+          const currentTags = event?.tags || [];
+          const itemTags = item?.tags || [];
+          return currentTags.some((tag) => itemTags.includes(tag)) || true; // if no common tags, still include
+        })
+        .sort((a, b) => {
+          // sort by start date (upcoming first)
+          const dateA = new Date(a?.start);
+          const dateB = new Date(b?.start);
+          return dateA - dateB;
+        })
+        .slice(0, 3); // take first 3
     }
   } catch {}
 
   return (
     <div>
-      <section className="border-b border-white/10">
-        <PageShell className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="border-b border-white/10 bg-gradient-to-b from-[#0a0a0f] to-[#0f0f14]">
+        <PageShell className="grid gap-8 py-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.3em] text-[var(--brand-2)]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#206eaa]/30 bg-[#206eaa]/10 px-4 py-2 text-xs uppercase tracking-[0.3em] text-[#4a9fd8] font-medium">
               {event.status}
             </div>
-            <h1 className="text-3xl font-semibold sm:text-4xl">
+            <h1 className="text-4xl font-bold text-white sm:text-5xl">
               {event.title}
             </h1>
-            <p className="text-base text-[var(--muted)] sm:text-lg">
+            <p className="text-base text-white/75 sm:text-lg leading-relaxed">
               {event.description}
             </p>
-            <div className="flex flex-wrap gap-3 text-sm text-[var(--muted)]">
-              <span>
-                {formatDateTime(event.start)} · {formatDateTime(event.end)}
+            <div className="flex flex-wrap gap-3 text-sm text-white/70 font-medium">
+              <span className="flex items-center gap-2">
+                📅 {formatDateTime(event.start)} - {formatDateTime(event.end)}
               </span>
-              <span>· {event.location}</span>
+              <span className="flex items-center gap-2">📍 {event.location}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {(event.tags || []).map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-[var(--muted)]"
+                  className="rounded-full border border-[#206eaa]/30 bg-[#206eaa]/10 px-3 py-1 text-xs text-[#4a9fd8] font-medium"
                 >
                   {tag}
                 </span>
               ))}
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-4 pt-2">
               <Link
                 href={`/ticket-selection?title=${encodeURIComponent(event.title)}&date=${encodeURIComponent(formatDateTime(event.start))}&location=${encodeURIComponent(event.location)}&image=${encodeURIComponent(event.galleryImages?.[0] || event.coverImage || "")}`}
               >
-                <Button variant="primary" size="lg">
+                <Button variant="primary" size="lg" className="bg-[#206eaa] hover:bg-[#1a5a8f] text-white font-semibold shadow-lg shadow-[#206eaa]/30">
                   Book Tickets
                 </Button>
               </Link>
-              <Button variant="secondary" size="lg">
-                View Seat Map
-              </Button>
+              <a href="#seatMap">
+                <Button variant="secondary" size="lg" className="border border-white/20 bg-white/10 hover:bg-white/15 text-white font-medium">
+                  View Seat Map
+                </Button>
+              </a>
             </div>
           </div>
           <div
-            className="relative min-h-[280px] overflow-hidden rounded-[32px] border border-white/10 bg-[var(--surface-2)]/80 bg-cover bg-center p-6"
+            className="relative min-h-[380px] overflow-hidden rounded-3xl border border-white/20 bg-cover bg-center p-8 shadow-2xl shadow-[#206eaa]/20"
             style={{
               backgroundImage: event?.coverImage
                 ? `url("${event.coverImage}")`
                 : undefined,
             }}
           >
-            <div
-              className="absolute inset-0 bg-[var(--surface-2)]/40"
-              style={{ backgroundImage: "var(--hero-gradient)", opacity: 0.55 }}
-            />
-            <div className="relative flex h-full min-h-[220px] items-end">
-              <div className="space-y-2 drop-shadow-md">
-                <div className="text-xs uppercase tracking-[0.35em] text-white/90">
-                  From
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="relative flex h-full min-h-[300px] items-end">
+              <div className="space-y-3">
+                <div className="text-xs uppercase tracking-[0.35em] text-white/80 font-semibold">
+                  Starting from
                 </div>
-                <div className="text-3xl font-semibold text-white">
+                <div className="text-4xl font-bold text-white">
                   {findLowestSeatPrice(event.seats)}
                 </div>
-                <div className="text-sm text-white/85">
-                  Starts at general admission
+                <div className="text-sm text-white/80 font-medium">
+                  General admission available
                 </div>
               </div>
             </div>
@@ -152,74 +176,44 @@ export default async function EventDetailPage({ params }) {
         </PageShell>
       </section>
 
-      <section>
+      <section className="py-12 bg-gradient-to-b from-[#0f0f14] to-[#0a0a0f]">
         <PageShell className="space-y-8">
           <SectionHeader
             eyebrow="Gallery"
             title="Event gallery"
             subtitle="Swipe through the visual vibe before you book."
           />
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
             {(event.galleryImages || []).map((imageUrl, index) => (
-              <Card key={`${imageUrl}-${index}`} className="overflow-hidden p-0">
+              <div
+                key={`${imageUrl}-${index}`}
+                className="group relative rounded-2xl bg-gradient-to-br from-white/12 via-white/8 to-white/5 overflow-hidden border border-white/20 transition-all duration-300 hover:-translate-y-2 hover:border-[#206eaa]/60 hover:shadow-2xl hover:shadow-[#206eaa]/25 h-56"
+              >
                 <img
                   src={imageUrl}
                   alt={`${event.title} gallery ${index + 1}`}
-                  className="h-48 w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-              </Card>
+              </div>
             ))}
           </div>
         </PageShell>
       </section>
 
       {event.isSeated ? (
-        <section className="border-y border-white/10 bg-[var(--surface)]/50">
+        <section id="seatMap" className="border-y border-white/10 bg-gradient-to-b from-[#0a0a0f] to-[#0f0f14] py-12">
           <PageShell className="space-y-6">
             <SectionHeader
               eyebrow="Seat Map"
               title="Choose your seat"
               subtitle="Pick the spot that matches your energy."
             />
-            <div className="overflow-hidden rounded-3xl border border-white/10">
-              <table className="w-full border-collapse text-left text-sm">
-                <thead className="bg-white/5 text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-                  <tr>
-                    <th className="px-4 py-3">Type</th>
-                    <th className="px-4 py-3">Row</th>
-                    <th className="px-4 py-3">Column</th>
-                    <th className="px-4 py-3">Seat</th>
-                    <th className="px-4 py-3">Price</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Features</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {event.seats.map((seat) => (
-                    <tr key={seat.seatNumber} className="text-[var(--muted)]">
-                      <td className="px-4 py-3 text-[var(--foreground)]">
-                        {seat.type}
-                      </td>
-                      <td className="px-4 py-3">{seat.row}</td>
-                      <td className="px-4 py-3">{seat.column}</td>
-                      <td className="px-4 py-3">{seat.seatNumber}</td>
-                      <td className="px-4 py-3">{formatPrice(seat.price)}</td>
-                      <td className="px-4 py-3 capitalize">
-                        {seat.bookingStatus}
-                      </td>
-                      <td className="px-4 py-3">
-                        {seat.features?.join(", ") || "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <TheatreSeatingMap seats={event.seats} />
           </PageShell>
         </section>
       ) : null}
 
-      <section>
+      <section className="py-12 bg-gradient-to-b from-[#0f0f14] to-[#0a0a0f]">
         <PageShell className="space-y-8">
           <SectionHeader
             eyebrow="Related"
@@ -228,23 +222,36 @@ export default async function EventDetailPage({ params }) {
           />
           <div className="grid gap-6 md:grid-cols-3">
             {relatedEvents.map((item) => (
-              <Card key={item._id} className="space-y-3">
-                <div
-                  className="h-32 rounded-2xl bg-[var(--surface-2)]/80 bg-cover bg-center"
-                  style={{
-                    backgroundImage: item?.coverImage
-                      ? `url("${item.coverImage}")`
-                      : "none",
-                  }}
-                />
-                <div className="text-base font-semibold">{item.title}</div>
-                <div className="text-sm text-[var(--muted)]">
-                  {formatDateTime(item.start)} · {item.location}
+              <Link key={item._id} href={`/events/${item._id}`}>
+                <div className="group relative rounded-2xl bg-gradient-to-br from-white/12 via-white/8 to-white/5 backdrop-blur-lg border border-white/20 overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:border-[#206eaa]/60 hover:shadow-2xl hover:shadow-[#206eaa]/25 h-full flex flex-col cursor-pointer">
+                  <div className="relative h-40 overflow-hidden">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                      style={{
+                        backgroundImage: item?.coverImage
+                          ? `url("${item.coverImage}")`
+                          : "linear-gradient(135deg, rgba(32, 110, 170, 0.1) 0%, rgba(32, 110, 170, 0.05) 100%)",
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </div>
+                  <div className="p-4 flex-1 flex flex-col gap-3">
+                    <h3 className="text-lg font-bold text-white group-hover:text-[#4a9fd8] transition-colors line-clamp-2">
+                      {item.title}
+                    </h3>
+                    <div className="text-xs text-white/75 font-medium space-y-1">
+                      <div className="flex items-center gap-1">📅 {formatDateTime(item.start)}</div>
+                      <div className="flex items-center gap-1">📍 {item.location}</div>
+                    </div>
+                    <div className="mt-auto text-sm font-semibold text-white/50 group-hover:text-[#4a9fd8] transition-colors flex items-center gap-1">
+                      View event
+                      <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <Link href={`/events/${item._id}`}>
-                  <Button size="sm">View Event</Button>
-                </Link>
-              </Card>
+              </Link>
             ))}
           </div>
         </PageShell>
