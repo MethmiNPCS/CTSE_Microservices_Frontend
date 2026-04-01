@@ -31,86 +31,118 @@ export default function TicketSelection() {
   };
 
   return (
-    <main
-      className="min-h-screen flex flex-col items-center justify-center py-10 px-4 text-foreground"
-      style={{
-        backgroundColor: "var(--background)",
-        backgroundImage: "var(--glow-gradient)",
-      }}
-    >
-      <section className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
-        {/* Event Info */}
-        <div className="flex items-center gap-6 mb-8">
-          <img src={eventImage} alt="event" className="w-32 h-32 rounded-xl object-cover border border-gray-200 shadow-sm" />
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-red-500 text-lg">📅</span>
-              <span className="font-medium text-gray-700 text-base">{eventDate}</span>
+    <main className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#0f1419] to-[#050609] relative overflow-hidden py-12 px-4 flex items-center justify-center">
+      
+      {/* Subtle Background Glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#206eaa]/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-2xl">
+        
+        {/* Minimal Card */}
+        <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/8 via-white/3 to-white/[0.01] backdrop-blur-lg p-8 shadow-2xl shadow-[#206eaa]/20">
+          
+          {/* Header */}
+          <div className="mb-10 text-center">
+            <h1 className="text-4xl font-bold text-white mb-2">Select Tickets</h1>
+            <p className="text-white/60 text-sm">{eventTitle}</p>
+          </div>
+
+          {/* Ticket Cards - Minimal */}
+          <div className="space-y-4 mb-10">
+            
+            {/* VIP Ticket */}
+            <div className="flex items-center justify-between p-6 rounded-xl border border-white/15 bg-white/5 hover:border-[#206eaa]/40 hover:bg-white/8 transition-all">
+              <div className="flex items-center gap-4">
+                <span className="text-3xl">👑</span>
+                <div>
+                  <p className="text-white font-semibold">VIP Seating</p>
+                  <p className="text-white/50 text-xs">4,000 LKR</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 bg-white/10 rounded-lg p-2 border border-white/15">
+                <button 
+                  onClick={() => handleVipChange(-1)}
+                  className="w-7 h-7 flex items-center justify-center text-white/60 hover:text-white transition-all"
+                >
+                  −
+                </button>
+                <span className="w-8 text-center text-white font-bold">{vipCount}</span>
+                <button 
+                  onClick={() => handleVipChange(1)}
+                  className="w-7 h-7 flex items-center justify-center text-white/60 hover:text-white transition-all"
+                >
+                  +
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-blue-500 text-lg">🏷️</span>
-              <span className="text-blue-700 font-semibold text-lg">{eventTitle}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-red-500 text-lg">📍</span>
-              <span className="text-gray-600 text-base">{eventLocation}</span>
+
+            {/* Standing Ticket */}
+            <div className="flex items-center justify-between p-6 rounded-xl border border-white/15 bg-white/5 hover:border-[#206eaa]/40 hover:bg-white/8 transition-all">
+              <div className="flex items-center gap-4">
+                <span className="text-3xl">🎟️</span>
+                <div>
+                  <p className="text-white font-semibold">Standing Tickets</p>
+                  <p className="text-white/50 text-xs">1,500 LKR</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 bg-white/10 rounded-lg p-2 border border-white/15">
+                <button 
+                  onClick={() => handleStandardChange(-1)}
+                  className="w-7 h-7 flex items-center justify-center text-white/60 hover:text-white transition-all"
+                >
+                  −
+                </button>
+                <span className="w-8 text-center text-white font-bold">{standardCount}</span>
+                <button 
+                  onClick={() => handleStandardChange(1)}
+                  className="w-7 h-7 flex items-center justify-center text-white/60 hover:text-white transition-all"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Ticket Selection */}
-        <div className="mb-10">
-          <span className="block mb-4 font-semibold text-lg text-gray-700">Select your tickets</span>
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between bg-gray-100 rounded-xl p-6 shadow-sm">
-              <div>
-                <div className="font-bold text-xl text-gray-800">Vip Tickets</div>
-                <div className="text-gray-500 text-base">(4000 LKR)</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold text-black hover:bg-gray-300 transition" onClick={() => handleVipChange(-1)}>-</button>
-                <span className="w-10 text-center text-xl font-semibold text-black">{vipCount.toString().padStart(2, '0')}</span>
-                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold text-black hover:bg-gray-300 transition" onClick={() => handleVipChange(1)}>+</button>
-              </div>
-            </div>
-            <div className="flex items-center justify-between bg-gray-100 rounded-xl p-6 shadow-sm">
-              <div>
-                <div className="font-bold text-xl text-gray-800">Standing Tickets</div>
-                <div className="text-gray-500 text-base">(1500 LKR)</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold text-black hover:bg-gray-300 transition" onClick={() => handleStandardChange(-1)}>-</button>
-                <span className="w-10 text-center text-xl font-semibold text-black">{standardCount.toString().padStart(2, '0')}</span>
-                <button className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-xl font-bold text-black hover:bg-gray-300 transition" onClick={() => handleStandardChange(1)}>+</button>
-              </div>
+          {/* Total Price */}
+          <div className="mb-8 py-4 border-t border-b border-white/10">
+            <div className="flex justify-between items-center">
+              <span className="text-white/70">Total</span>
+              <span className="text-3xl font-black text-[#4a9fd8]">
+                {((vipCount * 4000) + (standardCount * 1500)).toLocaleString()} LKR
+              </span>
             </div>
           </div>
-        </div>
 
-        {/* Next Button */}
-        <div className="flex flex-wrap items-center gap-2 mb-6 mt-4">
-          <button
-            type="button"
-            onClick={() => {
-              const eventId = searchParams.get("id") || "";
-              if (eventId) {
-                router.push(`/events/${eventId}`);
-              } else {
-                router.push("/");
-              }
-            }}
-            className="flex items-center gap-2 rounded-2xl border border-gray-200 px-6 py-3 text-gray-600 transition hover:bg-gray-50"
-          >
-            ← Event
-          </button>
-          <button
-            className="bg-blue-600 text-white py-4 rounded-xl text-xl font-semibold hover:bg-blue-700 transition flex-1"
-            onClick={handleNext}
-          >
-            Next →
-          </button>
+          {/* Buttons */}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                const eventId = searchParams.get("id") || "";
+                if (eventId) {
+                  router.push(`/events/${eventId}`);
+                } else {
+                  router.push("/");
+                }
+              }}
+              className="px-6 py-3 rounded-lg border border-white/20 text-white font-semibold hover:bg-white/10 transition-all"
+            >
+              Back
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={vipCount === 0 && standardCount === 0}
+              className="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-[#206eaa] to-[#1a5a8f] hover:from-[#1a5a8f] hover:to-[#0f3d5a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold transition-all shadow-lg shadow-[#206eaa]/40"
+            >
+              Continue
+            </button>
+          </div>
         </div>
-      </section>
+      </div>
     </main>
   );
 }

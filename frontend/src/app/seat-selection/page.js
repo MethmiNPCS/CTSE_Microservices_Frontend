@@ -66,14 +66,14 @@ export default function SeatSelectionPage() {
     const isReserved = reservedSeats.has(seatNumber);
     const isSelected = selectedSeats.has(seatNumber);
 
-    let seatClasses = "w-10 h-10 rounded-lg border text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400";
+    let seatClasses = "w-8 h-8 rounded text-xs font-bold transition-all focus-visible:outline-none";
 
     if (isReserved) {
-      seatClasses += " bg-amber-100 text-amber-600 border-amber-200 cursor-not-allowed";
+      seatClasses += " bg-amber-500/60 text-white border border-amber-500/40 cursor-not-allowed";
     } else if (isSelected) {
-      seatClasses += " bg-blue-600 text-white border-blue-600";
+      seatClasses += " bg-[#4a9fd8] text-white border border-[#206eaa] shadow-lg shadow-[#206eaa]/40";
     } else {
-      seatClasses += " bg-gray-50 text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600";
+      seatClasses += " bg-white/10 text-white/60 border border-white/20 hover:border-white/40 hover:bg-white/15";
     }
 
     return (
@@ -92,122 +92,102 @@ export default function SeatSelectionPage() {
   };
 
   return (
-    <main
-      className="min-h-screen bg-background py-12 text-foreground"
-      style={{ backgroundImage: "var(--glow-gradient)" }}
-    >
-      <div className="mx-auto w-full max-w-5xl space-y-10 px-4">
-        <section className="w-full rounded-3xl bg-white/90 p-10 shadow-2xl">
-          <div className="mb-8 flex flex-wrap gap-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <img
-              src={eventImage}
-              alt="event"
-              className="h-32 w-48 rounded-2xl object-cover shadow-md"
-            />
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-gray-700">
-                <span className="text-xl">📅</span>
-                <span className="font-medium">{eventDate}</span>
+    <main className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#0f1419] to-[#050609] relative overflow-hidden py-12 px-4 flex items-center justify-center">
+      
+      {/* Subtle Background Glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#206eaa]/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-4xl">
+        
+        {/* Main Card */}
+        <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/8 via-white/3 to-white/[0.01] backdrop-blur-lg p-8 shadow-2xl shadow-[#206eaa]/20">
+          
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-white mb-1">Select Seats</h1>
+            <p className="text-white/50 text-sm">{eventTitle}</p>
+          </div>
+
+          {/* Event Details */}
+          <div className="flex gap-3 text-xs text-white/60 mb-8 pb-6 border-b border-white/10 flex-wrap justify-center">
+            <span>📅 {eventDate}</span>
+            <span>•</span>
+            <span>⏰ {eventTime}</span>
+            <span>•</span>
+            <span>📍 {eventLocation}</span>
+          </div>
+
+          {/* Seat Grid */}
+          <div className="mb-8">
+            {/* Legend */}
+            <div className="flex items-center justify-center gap-6 text-xs mb-6">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded bg-white/20 border border-white/40"></span>
+                <span className="text-white/60">Available</span>
               </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <span className="text-xl">⏰</span>
-                <span>{eventTime}</span>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded bg-amber-500/60"></span>
+                <span className="text-white/60">Reserved</span>
               </div>
-              <div className="flex items-center gap-3 text-blue-700">
-                <span className="text-xl">🏷️</span>
-                <span className="text-lg font-semibold">{eventTitle}</span>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded bg-[#4a9fd8]"></span>
+                <span className="text-white/60">Selected</span>
               </div>
-              <div className="flex items-center gap-3 text-gray-600">
-                <span className="text-xl">📍</span>
-                <span>{eventLocation}</span>
+            </div>
+
+            {/* Theatre Layout */}
+            <div className="p-6 rounded-lg bg-white/5 border border-white/10 flex justify-center">
+              <div className="space-y-2">
+                {seatRows.map((row) => (
+                  <div key={row} className="flex items-center gap-3 justify-center">
+                    <span className="w-6 text-center text-xs font-bold text-white/40">{row}</span>
+                    <div className="flex gap-2">
+                      {Array.from({ length: seatsPerRow }, (_, seatIndex) => renderSeat(row, seatIndex))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Select your Seats</p>
-                <h2 className="text-2xl font-semibold text-gray-800">VIP Tickets</h2>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span className="h-2 w-2 rounded-full bg-green-400" /> Available
-                <span className="h-2 w-2 rounded-full bg-amber-400" /> Reserved
-                <span className="h-2 w-2 rounded-full bg-blue-500" /> Selected
-              </div>
-            </div>
-
-            <div className="mt-8 mx-auto w-full max-w-3xl space-y-3 rounded-2xl border border-gray-100 bg-gray-50/60 p-6">
-              {seatRows.map((row) => (
-                <div key={row} className="flex items-center justify-center gap-4">
-                  <span className="w-6 text-center text-sm font-medium text-gray-400">{row}</span>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {Array.from({ length: seatsPerRow }, (_, seatIndex) => renderSeat(row, seatIndex))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                <strong className="text-gray-800">Selected:</strong>
+          {/* Selected Seats */}
+          <div className="p-4 rounded-lg bg-gradient-to-r from-[#206eaa]/20 to-[#1a5a8f]/10 border border-[#206eaa]/20 mb-8">
+            <div className="flex flex-col items-center justify-center gap-3 text-center">
+              <span className="text-white/70 text-sm">Seats: {selectedSeats.size}/{maxSeats}</span>
+              <div className="flex flex-wrap gap-2 justify-center">
                 {Array.from(selectedSeats)
                   .sort()
                   .map((seat) => (
-                    <span key={seat} className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">
+                    <span key={seat} className="px-2 py-1 rounded text-xs font-semibold bg-[#206eaa]/40 text-[#4a9fd8] border border-[#206eaa]/30">
                       {seat}
                     </span>
                   ))}
-                {selectedSeats.size === 0 ? <span>No seats selected yet</span> : null}
-              </div>
-              <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">Change section ▼</button>
-            </div>
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-4">
-            <div className="flex-1 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-gray-400">Standing Tickets</p>
-                  <p className="text-base font-semibold text-gray-800">(Available)</p>
-                </div>
-                <span className="text-xl text-gray-400">⌄</span>
-              </div>
-            </div>
-            <div className="flex-1 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-gray-400">Legend</p>
-                  <p className="text-base font-semibold text-gray-800">Seat status</p>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
-                  <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-white border border-gray-300" /> Available</span>
-                  <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-amber-400" /> Reserved</span>
-                  <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-blue-500" /> Selected</span>
-                </div>
+                {selectedSeats.size === 0 && <span className="text-white/50 text-xs">No seats selected</span>}
               </div>
             </div>
           </div>
 
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <button
-                type="button"
-                onClick={handlePrevious}
-                className="flex items-center gap-2 rounded-2xl border border-blue-200 px-6 py-3 text-blue-600 transition hover:bg-blue-50"
-              >
-                ← Previous
-              </button>
-            </div>
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handlePrevious}
+              className="px-6 py-3 rounded-lg border border-white/20 text-white text-sm font-semibold hover:bg-white/10 transition-all"
+            >
+              Back
+            </button>
             <button
               type="button"
               onClick={handleNext}
-              className="flex items-center gap-2 rounded-2xl bg-blue-600 px-10 py-3 text-white shadow-lg transition hover:bg-blue-700"
+              disabled={selectedSeats.size === 0}
+              className="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-[#206eaa] to-[#1a5a8f] hover:from-[#1a5a8f] hover:to-[#0f3d5a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-all shadow-lg shadow-[#206eaa]/40"
             >
-              Next →
+              Continue
             </button>
           </div>
-        </section>
+        </div>
       </div>
     </main>
   );

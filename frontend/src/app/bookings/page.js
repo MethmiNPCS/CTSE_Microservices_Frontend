@@ -2,10 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import Card from "../../components/ui/Card";
-import PageShell from "../../components/layout/PageShell";
-import SectionHeader from "../../components/ui/SectionHeader";
-
 export default function BookingsPage() {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const [bookings, setBookings] = useState([]);
@@ -68,89 +64,113 @@ export default function BookingsPage() {
   }, [apiBaseUrl]);
 
   return (
-    <PageShell className="space-y-8">
-      <SectionHeader
-        eyebrow="Bookings"
-        title="My bookings"
-        subtitle="Track your tickets and upcoming festival moments."
-      />
+    <main className="min-h-screen bg-[#0a0a0f] py-16 px-4">
+      <div className="max-w-4xl mx-auto">
+        
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-5xl font-black text-white mb-2">
+            My Bookings
+          </h1>
+          <p className="text-white/60 text-base">
+            Track your tickets and upcoming festival moments.
+          </p>
+        </div>
 
-      <div className="grid gap-6">
-        {isLoading ? (
-          <Card>
-            <p className="text-sm text-[var(--muted)]">Loading bookings...</p>
-          </Card>
-        ) : null}
-        {!isLoading && errorMessage ? (
-          <Card>
-            <p className="text-sm text-red-400">{errorMessage}</p>
-          </Card>
-        ) : null}
-        {!isLoading && !errorMessage && bookings.length === 0 ? (
-          <Card>
-            <p className="text-sm text-[var(--muted)]">No bookings found.</p>
-          </Card>
-        ) : null}
-        {bookings.map((booking) => (
-          <Card
-            key={booking.booking_id || `${booking.event_id}-${booking.email}`}
-            className="space-y-4"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <div className="text-lg font-semibold">{booking.event_name}</div>
-                <div className="text-sm text-[var(--muted)]">
-                  Event ID: {booking.event_id}
-                </div>
-              </div>
-              <span className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-semibold text-green-400">
-                Confirmed
-              </span>
+        {/* Bookings Grid */}
+        <div className="space-y-6">
+          
+          {/* Loading State */}
+          {isLoading && (
+            <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
+              <div className="inline-block w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+              <p className="text-white/60 text-sm">Loading your bookings...</p>
             </div>
+          )}
 
-            <div className="grid gap-3 text-sm text-[var(--muted)] sm:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Customer</div>
-                <div className="text-sm text-[var(--foreground)]">
-                  {booking.customer_name}
+          {/* Error State */}
+          {!isLoading && errorMessage && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-8">
+              <p className="text-red-400 font-semibold text-sm">{errorMessage}</p>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isLoading && !errorMessage && bookings.length === 0 && (
+            <div className="rounded-xl border border-white/10 bg-white/5 p-12 text-center">
+              <div className="text-4xl mb-3">🎫</div>
+              <h3 className="text-lg font-bold text-white mb-1">No Bookings Yet</h3>
+              <p className="text-white/50 text-sm">You haven't booked any events yet.</p>
+            </div>
+          )}
+
+          {/* Booking Cards */}
+          {bookings.map((booking) => (
+            <div
+              key={booking.booking_id || `${booking.event_id}-${booking.email}`}
+              className="rounded-xl border border-white/10 bg-white/5 p-6 hover:border-white/20 hover:bg-white/8 transition-all"
+            >
+              
+              {/* Header */}
+              <div className="flex items-start justify-between gap-4 mb-6 pb-4 border-b border-white/10">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-1">
+                    {booking.event_name}
+                  </h3>
+                  <p className="text-white/50 text-xs">
+                    Event ID: {booking.event_id}
+                  </p>
                 </div>
+                <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold">
+                  Confirmed
+                </span>
               </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Email</div>
-                <div className="text-sm text-[var(--foreground)]">
-                  {booking.email}
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
+                
+                <div>
+                  <p className="text-white/50 text-xs font-semibold mb-1">CUSTOMER</p>
+                  <p className="text-white font-semibold">{booking.customer_name || "-"}</p>
                 </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Phone</div>
-                <div className="text-sm text-[var(--foreground)]">
-                  {booking.phone_number}
+
+                <div>
+                  <p className="text-white/50 text-xs font-semibold mb-1">EMAIL</p>
+                  <p className="text-white/80 font-semibold break-all">{booking.email || "-"}</p>
                 </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Ticket Price</div>
-                <div className="text-sm text-[var(--foreground)]">
-                  LKR {Number(booking.ticket_price || 0).toLocaleString()}
+
+                <div>
+                  <p className="text-white/50 text-xs font-semibold mb-1">PHONE</p>
+                  <p className="text-white font-semibold">{booking.phone_number || "-"}</p>
                 </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Booking Date</div>
-                <div className="text-sm text-[var(--foreground)]">
-                  {booking.booking_date
-                    ? new Date(booking.booking_date).toLocaleDateString()
-                    : "-"}
+
+                <div>
+                  <p className="text-white/50 text-xs font-semibold mb-1">TICKET PRICE</p>
+                  <p className="text-[#4a9fd8] font-bold">LKR {Number(booking.ticket_price || 0).toLocaleString()}</p>
                 </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em]">Booking Time</div>
-                <div className="text-sm text-[var(--foreground)]">
-                  {booking.booking_time || "-"}
+
+                <div>
+                  <p className="text-white/50 text-xs font-semibold mb-1">BOOKING DATE</p>
+                  <p className="text-white font-semibold">
+                    {booking.booking_date
+                      ? new Date(booking.booking_date).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "-"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-white/50 text-xs font-semibold mb-1">BOOKING TIME</p>
+                  <p className="text-white font-semibold">{booking.booking_time || "-"}</p>
                 </div>
               </div>
             </div>
-          </Card>
-        ))}
+          ))}
+        </div>
       </div>
-    </PageShell>
+    </main>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ConfirmationPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const eventTitle = searchParams.get("title") || "Event Title";
   const eventDate = searchParams.get("date") || "Event Date";
@@ -31,120 +32,96 @@ export default function ConfirmationPage() {
 
   const handleDownload = () => alert("Downloading ticket...");
   const handleShare = () => alert("Sharing ticket via email...");
+  const handleHome = () => router.push("/");
 
   return (
-    <main
-      className="min-h-screen bg-background py-12 text-foreground"
-      style={{ backgroundImage: "var(--glow-gradient)" }}
-    >
-      <div className="mx-auto w-full max-w-5xl space-y-10 px-4">
-        <section className="rounded-3xl bg-white/90 p-10 shadow-2xl">
-          <div className="rounded-3xl border border-gray-100 bg-white p-10 text-center shadow-sm">
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 text-4xl">
-              🎉
-            </div>
-            <h1 className="mt-6 text-2xl font-semibold" style={{ color: '#b30000' }}>
-              Thanks a lot for purchasing tickets
-            </h1>
-            <p className="mt-2 text-sm text-gray-500">
-              We have sent your tickets to your email. Present them at the venue entrance.
-            </p>
+    <main className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#0f1419] to-[#050609] relative overflow-hidden py-12 px-4 flex items-center justify-center">
+      
+      {/* Subtle Background Glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#206eaa]/10 rounded-full blur-3xl"></div>
+      </div>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {purchasedTickets.map((ticket) => (
-                <article
-                  key={ticket.seat}
-                  className="rounded-3xl border border-gray-100 bg-white shadow-inner"
-                >
-                  <img
-                    src={ticket.image}
-                    alt={ticket.title}
-                    className="h-48 w-full rounded-t-3xl object-cover"
-                  />
-                  <div className="space-y-4 border-t border-dashed border-gray-200 px-6 py-6 text-left">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.3em]" style={{ color: '#003366' }}>Ticket</p>
-                      <h2 className="text-xl font-semibold" style={{ color: '#003366' }}>{ticket.title}</h2>
-                      <p className="text-sm" style={{ color: '#003366' }}>{ticket.location}</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
-                      <div>
-                        <p className="text-xs text-gray-400">Date</p>
-                        <p className="font-semibold text-gray-800">{ticket.date}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Time</p>
-                        <p className="font-semibold text-gray-800">{ticket.time}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Zone</p>
-                        <p className="font-semibold text-gray-800">{ticket.zone}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Row</p>
-                        <p className="font-semibold text-gray-800">{ticket.row}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Seat</p>
-                        <p className="font-semibold text-gray-800">{ticket.seat}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Name</p>
-                        <p className="font-semibold text-gray-800">{ticket.holder}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Phone</p>
-                        <p className="font-semibold text-gray-800">{ticket.phone}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Email</p>
-                        <p className="font-semibold text-gray-800">{ticket.email}</p>
-                      </div>
-                    </div>
-                    <div className="border-t border-gray-100 pt-4 text-center text-sm text-gray-500">
-                      EventWave — Present this ticket at the entry gate.
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <button
-                type="button"
-                onClick={() => {
-                  window.history.back();
-                }}
-                className="flex items-center gap-2 rounded-2xl border border-blue-200 px-6 py-3 text-blue-600 transition hover:bg-blue-50"
-              >
-                ← Previous
-              </button>
-            </div>
-
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="flex items-center gap-2 rounded-2xl border border-blue-200 px-6 py-3 text-blue-600 transition hover:bg-blue-50"
-              >
-                Download Ticket
-              </button>
-              <button
-                type="button"
-                onClick={handleShare}
-                className="flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-white shadow-lg transition hover:bg-blue-700"
-              >
-                Share to Mail
-              </button>
-            </div>
-
-            <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-500">
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
-              <span className="h-2 w-2 rounded-full bg-gray-200" />
-              <span className="h-2 w-2 rounded-full bg-gray-200" />
+      <div className="relative z-10 w-full max-w-2xl">
+        
+        {/* Main Card */}
+        <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/8 via-white/3 to-white/[0.01] backdrop-blur-lg p-8 shadow-2xl shadow-[#206eaa]/20">
+          
+          {/* Success Icon */}
+          <div className="flex justify-center mb-6">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#206eaa]/30 to-[#1a5a8f]/20 border border-[#206eaa]/40 flex items-center justify-center text-3xl">
+              ✓
             </div>
           </div>
-        </section>
+
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-white mb-1">Confirmed!</h1>
+            <p className="text-white/50 text-xs">#BK{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+          </div>
+
+          {/* Details */}
+          <div className="space-y-3 mb-8">
+            
+            <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+              <p className="text-xs font-semibold text-white/70 uppercase tracking-wide mb-1">Event</p>
+              <p className="text-white font-semibold text-sm">{eventTitle}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                <p className="text-xs font-semibold text-white/70 uppercase tracking-wide mb-1">Date</p>
+                <p className="text-white font-semibold text-sm">{eventDate}</p>
+              </div>
+              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                <p className="text-xs font-semibold text-white/70 uppercase tracking-wide mb-1">Seats</p>
+                <p className="text-[#4a9fd8] font-bold text-sm">{seatNumbers.join(", ")}</p>
+              </div>
+            </div>
+
+            <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+              <p className="text-xs font-semibold text-white/70 uppercase tracking-wide mb-1">Name</p>
+              <p className="text-white font-semibold text-sm">{userName}</p>
+            </div>
+
+            <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+              <p className="text-xs font-semibold text-white/70 uppercase tracking-wide mb-1">Email</p>
+              <p className="text-white font-semibold text-xs truncate">{userEmail}</p>
+            </div>
+          </div>
+
+          {/* Message */}
+          <div className="text-center mb-8 p-3 rounded-lg bg-[#206eaa]/10 border border-[#206eaa]/20">
+            <p className="text-white/70 text-xs">✓ Confirmation email sent</p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="flex-1 px-6 py-2.5 rounded-lg border border-white/20 text-white text-sm font-semibold hover:bg-white/10 transition-all"
+            >
+              📥 Download
+            </button>
+            <button
+              type="button"
+              onClick={handleShare}
+              className="flex-1 px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#206eaa] to-[#1a5a8f] hover:from-[#1a5a8f] hover:to-[#0f3d5a] text-white text-sm font-semibold transition-all shadow-lg shadow-[#206eaa]/40"
+            >
+              ✉️ Share
+            </button>
+          </div>
+
+          {/* Home Button */}
+          <button
+            type="button"
+            onClick={handleHome}
+            className="w-full px-6 py-2.5 rounded-lg border border-white/20 text-white text-sm font-semibold hover:bg-white/10 transition-all mt-4"
+          >
+            🏠 Back to Home
+          </button>
+        </div>
       </div>
     </main>
   );
