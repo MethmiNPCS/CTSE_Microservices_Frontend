@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-
-import Button from "../../components/ui/Button";
-import Card from "../../components/ui/Card";
-import Input from "../../components/ui/Input";
-import SectionHeader from "../../components/ui/SectionHeader";
-import PageShell from "../../components/layout/PageShell";
 import { useAuth } from "../../context/AuthContext";
-
-const cardClassName =
-  "border-black/10 bg-white/85 shadow-[0_22px_45px_-30px_rgba(15,23,42,0.35)]";
 
 const formatDate = (value) => {
   if (!value) {
@@ -21,7 +12,11 @@ const formatDate = (value) => {
   if (Number.isNaN(date.getTime())) {
     return "—";
   }
-  return date.toLocaleString();
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 };
 
 const getReviewId = (review) =>
@@ -230,177 +225,205 @@ export default function ReviewsPage() {
 
   if (!authLoading && !token) {
     return (
-      <PageShell className="space-y-8">
-        <SectionHeader
-          eyebrow="Reviews"
-          title="My reviews"
-          subtitle="Sign in to see reviews you have submitted."
-        />
-        <Card className={cardClassName}>
-          <p className="text-sm text-[var(--muted)]">
-            You need to be logged in to view your reviews.
-          </p>
-          <Link href="/login" className="mt-4 inline-block">
-            <Button>Go to login</Button>
-          </Link>
-        </Card>
-      </PageShell>
+      <main className="min-h-screen bg-[#0a0a0f] py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-5xl font-black text-white mb-2">My Reviews</h1>
+          <p className="text-white/60 text-base mb-12">Sign in to see reviews you have submitted.</p>
+          <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
+            <p className="text-white/60 text-sm mb-6">You need to be logged in to view your reviews.</p>
+            <Link href="/login">
+              <button className="px-6 py-2.5 rounded-lg bg-[#206eaa] hover:bg-[#1a5a8f] text-white text-sm font-bold transition-all">
+                Go to login
+              </button>
+            </Link>
+          </div>
+        </div>
+      </main>
     );
   }
 
   return (
-    <PageShell className="space-y-10">
-      <SectionHeader
-        eyebrow="Review service"
-        title="My reviews"
-        subtitle="Reviews you have submitted for events."
-      />
+    <main className="min-h-screen bg-[#0a0a0f] py-16 px-4">
+      <div className="max-w-4xl mx-auto">
+        
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-5xl font-black text-white mb-2">
+            My Reviews
+          </h1>
+          <p className="text-white/60 text-base">
+            Reviews you have submitted for events.
+          </p>
+        </div>
 
-      {isLoading ? (
-        <Card className={`text-sm text-[var(--muted)] ${cardClassName}`}>
-          Loading your reviews...
-        </Card>
-      ) : null}
+        {/* Stats Cards */}
+        {!isLoading && !errorMessage && reviews.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="text-white/50 text-xs font-semibold mb-1">TOTAL REVIEWS</p>
+              <p className="text-2xl font-bold text-white">{stats.total}</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="text-white/50 text-xs font-semibold mb-1">AVG RATING</p>
+              <p className="text-2xl font-bold text-[#4a9fd8]">{stats.avgRating} ⭐</p>
+            </div>
+          </div>
+        )}
 
-      {!isLoading && errorMessage ? (
-        <Card className={`text-sm text-red-400 ${cardClassName}`}>
-          {errorMessage}
-        </Card>
-      ) : null}
+        {/* Reviews Grid */}
+        <div className="space-y-6">
+          
+          {/* Loading State */}
+          {isLoading && (
+            <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
+              <div className="inline-block w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+              <p className="text-white/60 text-sm">Loading your reviews...</p>
+            </div>
+          )}
 
-      {!isLoading && !errorMessage && reviews.length === 0 ? (
-        <Card className={`text-sm text-[var(--muted)] ${cardClassName}`}>
-          No reviews yet. Submit a review from an event page.
-        </Card>
-      ) : null}
+          {/* Error State */}
+          {!isLoading && errorMessage && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-8">
+              <p className="text-red-400 font-semibold text-sm">{errorMessage}</p>
+            </div>
+          )}
 
-      {actionError ? (
-        <Card className={`text-sm text-red-400 ${cardClassName}`}>{actionError}</Card>
-      ) : null}
+          {/* Empty State */}
+          {!isLoading && !errorMessage && reviews.length === 0 && (
+            <div className="rounded-xl border border-white/10 bg-white/5 p-12 text-center">
+              <div className="text-4xl mb-3">⭐</div>
+              <h3 className="text-lg font-bold text-white mb-1">No Reviews Yet</h3>
+              <p className="text-white/50 text-sm">Submit a review from an event page.</p>
+            </div>
+          )}
 
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-4">
+          {/* Action Error */}
+          {actionError && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+              <p className="text-red-400 text-sm">{actionError}</p>
+            </div>
+          )}
+
+          {/* Review Cards */}
           {reviews.map((review, index) => {
             const rid = getReviewId(review);
             const isEditing = editingId === rid;
 
             return (
-              <Card
+              <div
                 key={rid || `review-${index}`}
-                className={`space-y-3 ${cardClassName}`}
+                className="rounded-xl border border-white/10 bg-white/5 p-6 hover:border-white/20 hover:bg-white/8 transition-all"
               >
-                <div className="flex flex-wrap items-start justify-between gap-3">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-4 mb-6 pb-4 border-b border-white/10">
                   <div>
-                    <div className="text-lg font-semibold">{review.event_name}</div>
-                    <div className="text-xs text-[var(--muted)]">
+                    <h3 className="text-xl font-bold text-white mb-1">
+                      {review.event_name}
+                    </h3>
+                    <p className="text-white/50 text-xs">
                       Event ID: {review.event_id}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link href={`/events/${review.event_id}`}>
-                      <Button size="sm" variant="secondary">
-                        View event
-                      </Button>
-                    </Link>
-                    {isEditing ? (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          type="button"
-                          onClick={cancelEdit}
-                          disabled={savingId === rid}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => handleUpdate(review)}
-                          disabled={savingId === rid}
-                        >
-                          {savingId === rid ? "Saving..." : "Save"}
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          type="button"
-                          onClick={() => startEdit(review)}
-                          disabled={Boolean(deletingId) || Boolean(savingId)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          type="button"
-                          onClick={() => handleDelete(review)}
-                          disabled={deletingId === rid || Boolean(savingId)}
-                        >
-                          {deletingId === rid ? "Deleting..." : "Delete"}
-                        </Button>
-                      </>
-                    )}
+                    </p>
                   </div>
                 </div>
+
+                {/* Rating Display */}
+                {!isEditing && (
+                  <div className="mb-4">
+                    <p className="text-lg font-bold text-[#4a9fd8] mb-2">
+                      {"⭐".repeat(Number(review.rating) || 0)}
+                    </p>
+                  </div>
+                )}
+
+                {/* Comment */}
                 {isEditing ? (
-                  <div className="space-y-3">
-                    <Input
-                      type="number"
-                      min="1"
-                      max="5"
-                      name="rating"
-                      value={editForm.rating}
-                      onChange={(e) =>
-                        setEditForm((f) => ({ ...f, rating: e.target.value }))
-                      }
-                    />
-                    <textarea
-                      name="comment"
-                      value={editForm.comment}
-                      onChange={(e) =>
-                        setEditForm((f) => ({ ...f, comment: e.target.value }))
-                      }
-                      className="min-h-[100px] w-full rounded-2xl border border-black/15 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-                      placeholder="Your comment"
-                    />
+                  <div className="space-y-4 mb-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-white/60 mb-2">Rating (1-5)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        name="rating"
+                        value={editForm.rating}
+                        onChange={(e) =>
+                          setEditForm((f) => ({ ...f, rating: e.target.value }))
+                        }
+                        className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:border-[#206eaa] focus:bg-white/15 outline-none text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-white/60 mb-2">Comment</label>
+                      <textarea
+                        name="comment"
+                        value={editForm.comment}
+                        onChange={(e) =>
+                          setEditForm((f) => ({ ...f, comment: e.target.value }))
+                        }
+                        rows="4"
+                        className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-[#206eaa] focus:bg-white/15 outline-none text-sm resize-none"
+                        placeholder="Your comment"
+                      />
+                    </div>
                   </div>
                 ) : (
-                  <>
-                    <div className="text-sm text-[var(--muted)]">
-                      {"★".repeat(Number(review.rating) || 0)}
-                    </div>
-                    <p className="text-sm">{review.comment}</p>
-                  </>
+                  <p className="text-white/70 text-sm mb-4">{review.comment}</p>
                 )}
-                <div className="text-xs text-[var(--muted)]">
+
+                {/* Meta Info */}
+                <div className="text-xs text-white/50 mb-4 pb-4 border-b border-white/10">
                   {formatDate(review.createdAt)}
                 </div>
-              </Card>
+
+                {/* Actions */}
+                <div className="flex flex-wrap gap-2">
+                  <Link href={`/events/${review.event_id}`}>
+                    <button className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-all">
+                      View Event
+                    </button>
+                  </Link>
+
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={cancelEdit}
+                        disabled={savingId === rid}
+                        className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-all disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => handleUpdate(review)}
+                        disabled={savingId === rid}
+                        className="px-4 py-2 rounded-lg bg-[#206eaa] hover:bg-[#1a5a8f] text-white text-xs font-bold transition-all disabled:opacity-50"
+                      >
+                        {savingId === rid ? "Saving..." : "Save"}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => startEdit(review)}
+                        disabled={Boolean(deletingId) || Boolean(savingId)}
+                        className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-all disabled:opacity-50"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(review)}
+                        disabled={deletingId === rid || Boolean(savingId)}
+                        className="px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs font-semibold transition-all disabled:opacity-50"
+                      >
+                        {deletingId === rid ? "Deleting..." : "Delete"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>
-
-        <Card className={`space-y-3 ${cardClassName}`}>
-          <div className="text-xs uppercase tracking-[0.3em] text-[var(--brand-2)]">
-            Review stats
-          </div>
-          <div className="grid gap-3 text-sm text-[var(--muted)] sm:grid-cols-2">
-            <div>
-              <div className="text-xs uppercase tracking-[0.2em]">Total</div>
-              <div className="text-base text-[var(--foreground)]">{stats.total}</div>
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-[0.2em]">Avg rating</div>
-              <div className="text-base text-[var(--foreground)]">
-                {stats.avgRating}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </section>
-    </PageShell>
+      </div>
+    </main>
   );
 }

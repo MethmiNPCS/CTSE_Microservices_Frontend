@@ -34,93 +34,118 @@ export default function DetailsPage() {
   };
 
   return (
-    <main
-      className="min-h-screen bg-[var(--background)] py-12 px-4 text-[var(--foreground)]"
-      style={{ backgroundImage: "var(--glow-gradient)" }}
-    >
-      <div className="mx-auto w-full max-w-5xl space-y-10">
-        <section className="rounded-3xl bg-white/90 p-10 shadow-2xl">
-          <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-            <header className="mb-8">
-              <p className="text-sm font-medium text-blue-500">Ticket Details</p>
-              <h1 className="text-2xl font-semibold text-gray-800">We just need a few more details</h1>
-              <p className="text-sm text-gray-500">
-                Share the attendee's information to keep the booking personalized.
-              </p>
-            </header>
+    <main className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#0f1419] to-[#050609] relative overflow-hidden py-12 px-4">
+      
+      {/* Subtle Background Glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#206eaa]/10 rounded-full blur-3xl"></div>
+      </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
-                <label className="flex flex-col gap-2 text-sm font-medium text-gray-600">
-                  Full Name
+      <div className="relative z-10 max-w-5xl mx-auto">
+        
+        {/* Main Container - Two Column */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          
+          {/* Left - Event Image */}
+          <div className="hidden md:flex items-center justify-center">
+            <div className="relative w-full max-w-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#206eaa]/40 to-[#1a5a8f]/20 rounded-2xl blur-2xl"></div>
+              <img
+                src={eventImage}
+                alt={eventTitle}
+                className="relative w-full h-96 object-cover rounded-2xl border border-white/15 shadow-2xl shadow-[#206eaa]/30"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-2xl"></div>
+              <div className="absolute bottom-4 left-4 right-4">
+                <p className="text-white font-bold text-lg">{eventTitle}</p>
+                <p className="text-white/60 text-xs mt-1">{eventDate}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right - Form Card */}
+          <div>
+            <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/8 via-white/3 to-white/[0.01] backdrop-blur-lg p-8 shadow-2xl shadow-[#206eaa]/20">
+              
+              {/* Header */}
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-white mb-1">Attendee Details</h1>
+                <p className="text-white/50 text-xs">{eventTitle}</p>
+              </div>
+
+              {/* Summary */}
+              <div className="p-3 rounded-lg bg-white/5 border border-white/10 mb-6 text-center">
+                <p className="text-white/60 text-xs">{eventDate} • {totalTickets} Ticket{totalTickets !== 1 ? 's' : ''}</p>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                
+                {/* Full Name */}
+                <div>
+                  <label className="block text-xs font-semibold text-white/70 mb-1 uppercase tracking-wide">Name</label>
                   <input
                     type="text"
                     name="fullName"
                     value={formValues.fullName}
                     onChange={handleChange}
-                    placeholder="Full Name"
-                    className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-base font-normal text-gray-800 shadow-inner focus:border-blue-400 focus:bg-white focus:outline-none"
+                    placeholder="John Doe"
+                    className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-[#206eaa] focus:bg-white/15 focus:ring-1 focus:ring-[#206eaa]/40 transition-all outline-none text-sm"
                     required
                   />
-                </label>
-                <label className="flex flex-col gap-2 text-sm font-medium text-gray-600">
-                  Phone number
-                  <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 shadow-inner focus-within:border-blue-400 focus-within:bg-white">
-                    <span className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                      <span role="img" aria-label="Sri Lanka flag">
-                        🇱🇰
-                      </span>
-                      +94
-                    </span>
+                </div>
+
+                {/* Phone Number */}
+                <div>
+                  <label className="block text-xs font-semibold text-white/70 mb-1 uppercase tracking-wide">Phone</label>
+                  <div className="flex items-center px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 focus-within:border-[#206eaa] focus-within:bg-white/15 focus-within:ring-1 focus-within:ring-[#206eaa]/40 transition-all">
+                    <span className="text-xs font-semibold text-white/60 mr-2">+94</span>
                     <input
                       type="tel"
                       name="phone"
                       value={formValues.phone}
                       onChange={handleChange}
                       placeholder="(555) 000-0000"
-                      className="flex-1 bg-transparent text-base text-gray-800 outline-none"
+                      className="flex-1 bg-transparent text-white placeholder-white/40 outline-none text-sm"
                       required
                     />
                   </div>
-                </label>
-              </div>
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-600">
-                Email
-                <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 shadow-inner focus-within:border-blue-400 focus-within:bg-white">
-                  <span className="text-lg text-gray-400">✉️</span>
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-xs font-semibold text-white/70 mb-1 uppercase tracking-wide">Email</label>
                   <input
                     type="email"
                     name="email"
                     value={formValues.email}
                     onChange={handleChange}
-                    placeholder="email@gmail.com"
-                    className="flex-1 bg-transparent text-base text-gray-800 outline-none"
+                    placeholder="your@email.com"
+                    className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-[#206eaa] focus:bg-white/15 focus:ring-1 focus:ring-[#206eaa]/40 transition-all outline-none text-sm"
                     required
                   />
                 </div>
-              </label>
 
-              <div className="flex flex-wrap items-center gap-2 mb-6">
-                <button
-                  type="button"
-                  onClick={handlePrevious}
-                  className="flex items-center gap-2 rounded-2xl border border-blue-200 px-6 py-3 text-blue-600 transition hover:bg-blue-50"
-                >
-                  ← Previous
-                </button>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
-                <button
-                  type="submit"
-                  className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-white shadow-lg transition hover:bg-blue-700 md:flex-none md:px-12"
-                >
-                  Next →
-                </button>
-              </div>
-            </form>
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handlePrevious}
+                    className="px-6 py-2.5 rounded-lg border border-white/20 text-white text-sm font-semibold hover:bg-white/10 transition-all"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#206eaa] to-[#1a5a8f] hover:from-[#1a5a8f] hover:to-[#0f3d5a] text-white text-sm font-semibold transition-all shadow-lg shadow-[#206eaa]/40"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </section>
+        </div>
       </div>
     </main>
   );

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import Button from "../ui/Button";
 import { useAuth } from "../../context/AuthContext";
@@ -10,7 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Events", href: "/events" },
-  { label: "Blog", href: "/blogs" },
+  { label: "Blog", href: "/blog" },
   { label: "About Us", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
@@ -20,9 +20,29 @@ export default function Navbar() {
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    if (userDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [userDropdownOpen]);
 
   const handleLogout = () => {
     logout();
+    setUserDropdownOpen(false);
     router.push("/login");
   };
 
@@ -85,20 +105,94 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex items-center gap-2">
+        {/* Desktop Auth Section */}
+        <div className="hidden md:flex items-center gap-4">
           {isLoading ? null : isAuthenticated ? (
-            <>
-              <Link href="/profile">
-                <Button variant="secondary" size="md">
-                  👤 Profile
-                </Button>
-              </Link>
-              <Button size="md" onClick={handleLogout}>
-                Logout
-              </Button>
-            </>
+            /* User Dropdown Menu */
+            <div ref={dropdownRef} className="relative">
+              <button
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#206eaa]/20 to-[#1a5a8f]/10 border border-[#206eaa]/30 hover:border-[#206eaa]/60 hover:bg-gradient-to-r hover:from-[#206eaa]/30 hover:to-[#1a5a8f]/20 transition-all duration-300 group"
+              >
+                <span className="text-lg">👤</span>
+                <span className="text-sm font-semibold text-[#206eaa]">Account</span>
+                <svg
+                  className={`w-4 h-4 text-[#206eaa] transition-transform duration-300 ${
+                    userDropdownOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </button>
+
+              {/* Dropdown Menu */}
+              {userDropdownOpen && (
+                <div className="absolute right-0 mt-3 w-56 rounded-2xl border border-white/15 bg-gradient-to-br from-white/95 to-white/90 dark:from-[#0f1419] dark:to-[#050609] backdrop-blur-lg shadow-2xl shadow-[#206eaa]/20 dark:border-[#206eaa]/30 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  
+                  {/* Dropdown Header */}
+                  <div className="px-6 py-4 border-b border-[#206eaa]/10">
+                    <p className="text-xs font-semibold text-[#206eaa] uppercase tracking-wider">
+                      My Account
+                    </p>
+                  </div>
+
+                  {/* Dropdown Items */}
+                  <div className="py-2">
+                    {/* My Bookings */}
+                    <Link
+                      href="/bookings"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-3 px-6 py-3 text-sm font-semibold text-[#1f2937] dark:text-white hover:bg-[#206eaa]/10 dark:hover:bg-[#206eaa]/20 transition-all duration-200"
+                    >
+                      <span className="text-lg">🎫</span>
+                      <span>My Bookings</span>
+                    </Link>
+
+                    {/* My Reviews */}
+                    <Link
+                      href="/reviews"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-3 px-6 py-3 text-sm font-semibold text-[#1f2937] dark:text-white hover:bg-[#206eaa]/10 dark:hover:bg-[#206eaa]/20 transition-all duration-200"
+                    >
+                      <span className="text-lg">⭐</span>
+                      <span>My Reviews</span>
+                    </Link>
+
+                    {/* My Profile */}
+                    <Link
+                      href="/profile"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-3 px-6 py-3 text-sm font-semibold text-[#1f2937] dark:text-white hover:bg-[#206eaa]/10 dark:hover:bg-[#206eaa]/20 transition-all duration-200"
+                    >
+                      <span className="text-lg">👤</span>
+                      <span>My Profile</span>
+                    </Link>
+
+                    {/* Divider */}
+                    <div className="my-2 border-t border-[#206eaa]/10"></div>
+
+                    {/* Logout */}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-6 py-3 text-sm font-semibold text-red-600 hover:bg-red-500/10 dark:hover:bg-red-500/20 transition-all duration-200"
+                    >
+                      <span className="text-lg">🚪</span>
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
+            /* Login & Signup Buttons */
             <>
               <Link href="/login">
                 <Button variant="secondary" size="md">
@@ -160,17 +254,32 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          {/* Mobile User Section */}
           <div className="border-t border-[#206eaa]/20 pt-4 space-y-2">
             {isLoading ? null : isAuthenticated ? (
               <>
-                <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="secondary" size="md" className="w-full">
-                    👤 Profile
-                  </Button>
+                {/* My Bookings */}
+                <Link href="/bookings" onClick={() => setMobileMenuOpen(false)}>
+                  <div className="block w-full py-3 px-4 text-sm font-semibold text-[#206eaa] hover:bg-[#206eaa]/10 rounded-lg transition-all">
+                    🎫 My Bookings
+                  </div>
                 </Link>
-                <Button size="md" onClick={handleLogout} className="w-full">
-                  Logout
-                </Button>
+
+                {/* My Reviews */}
+                <Link href="/reviews" onClick={() => setMobileMenuOpen(false)}>
+                  <div className="block w-full py-3 px-4 text-sm font-semibold text-[#206eaa] hover:bg-[#206eaa]/10 rounded-lg transition-all">
+                    ⭐ My Reviews
+                  </div>
+                </Link>
+
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/30 hover:border-red-500/60 text-red-600 dark:text-red-400 font-semibold text-sm transition-all duration-300"
+                >
+                  🚪 Logout
+                </button>
               </>
             ) : (
               <>

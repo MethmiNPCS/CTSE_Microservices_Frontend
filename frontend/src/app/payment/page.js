@@ -49,111 +49,171 @@ export default function PaymentPage() {
   };
 
   return (
-    <main
-      className="min-h-screen bg-[var(--background)] py-12 px-4 text-[var(--foreground)]"
-      style={{ backgroundImage: "var(--glow-gradient)" }}
-    >
-      <div className="mx-auto w-full max-w-5xl space-y-10">
-        <section className="rounded-3xl bg-white/90 p-10 shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-6 shadow-inner">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                <input
-                  type="text"
-                  value={promo}
-                  onChange={(event) => setPromo(event.target.value)}
-                  placeholder="Promo code"
-                  className="flex-1 rounded-2xl border border-blue-100 bg-white px-4 py-3 text-base text-gray-700 focus:border-blue-300 focus:outline-none"
+    <main className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#0f1419] to-[#050609] relative overflow-hidden py-12 px-4">
+      
+      {/* Subtle Background Glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#206eaa]/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto">
+        
+        {/* Main Container - Two Column */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          
+          {/* Left - Booking Summary */}
+          <div className="hidden md:block">
+            <div className="sticky top-12">
+              {/* Event Image */}
+              <div className="relative mb-6 overflow-hidden rounded-2xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#206eaa]/40 to-[#1a5a8f]/20 rounded-2xl blur-2xl"></div>
+                <img
+                  src={eventImage}
+                  alt={eventTitle}
+                  className="relative w-full h-72 object-cover rounded-2xl border border-white/15 shadow-2xl shadow-[#206eaa]/30"
                 />
-                <button
-                  type="button"
-                  className="rounded-2xl border border-blue-200 px-6 py-3 text-sm font-semibold text-blue-600 transition hover:bg-white"
-                >
-                  Apply
-                </button>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-2xl"></div>
+                <div className="absolute bottom-4 left-4 right-4">
+                  <p className="text-white font-bold text-lg">{eventTitle}</p>
+                  <p className="text-white/60 text-xs mt-1">{eventDate}</p>
+                </div>
               </div>
-              <div className="mt-6 space-y-3 rounded-2xl bg-white p-6 text-sm text-gray-600">
-                <div className="flex items-center justify-between">
-                  <span>VIP Tickets ({vipCount})</span>
-                  <span className="font-semibold text-gray-800">{vipCount * vipPrice} LKR</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Standing Tickets ({standardCount})</span>
-                  <span className="font-semibold text-gray-800">{standardCount * standardPrice} LKR</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Service Fee</span>
-                  <span className="font-semibold text-gray-800">{serviceFee} LKR</span>
-                </div>
-                <div className="h-px bg-gray-100" />
-                <div className="flex items-center justify-between text-base font-semibold text-gray-900">
-                  <span>Total</span>
-                  <span>{total} LKR</span>
+
+              {/* Booking Details Card */}
+              <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/8 via-white/3 to-white/[0.01] backdrop-blur-lg p-6 shadow-2xl shadow-[#206eaa]/20">
+                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wide">Booking Summary</h3>
+                
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/60">VIP Tickets</span>
+                    <span className="text-white font-semibold">{vipCount}x</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/60">Standard Tickets</span>
+                    <span className="text-white font-semibold">{standardCount}x</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/60">Seats</span>
+                    <span className="text-white font-semibold text-xs">{seats}</span>
+                  </div>
+                  <div className="h-px bg-white/10 my-2" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/60">Attendee</span>
+                    <span className="text-white font-semibold text-xs">{userName}</span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium text-gray-600">Payment methods</p>
-              <div className="mt-4 space-y-4">
-                {paymentOptions.map((option) => {
-                  const checked = selectedMethod === option.id;
-                  return (
-                    <label
-                      key={option.id}
-                      className={`flex cursor-pointer items-center justify-between rounded-2xl border px-4 py-4 transition ${
-                        checked ? "border-blue-200 bg-blue-50" : "border-gray-200 bg-white"
-                      }`}
+          {/* Right - Payment Card */}
+          <div>
+            <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/8 via-white/3 to-white/[0.01] backdrop-blur-lg p-8 shadow-2xl shadow-[#206eaa]/20">
+              
+              {/* Header */}
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-white mb-1">Payment</h1>
+                <p className="text-white/50 text-xs">Complete your booking</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                
+                {/* Price Summary */}
+                <div className="p-4 rounded-lg bg-white/5 border border-white/10 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Tickets</span>
+                    <span className="text-white font-semibold">{ticketPrice} LKR</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Service Fee</span>
+                    <span className="text-white font-semibold">{serviceFee} LKR</span>
+                  </div>
+                  <div className="h-px bg-white/10" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-white font-semibold">Total</span>
+                    <span className="text-2xl font-black text-[#4a9fd8]">{total} LKR</span>
+                  </div>
+                </div>
+
+                {/* Promo Code */}
+                <div>
+                  <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wide">Promo Code</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={promo}
+                      onChange={(event) => setPromo(event.target.value)}
+                      placeholder="Optional"
+                      className="flex-1 px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-[#206eaa] focus:bg-white/15 focus:ring-1 focus:ring-[#206eaa]/40 transition-all outline-none text-sm"
+                    />
+                    <button
+                      type="button"
+                      className="px-4 py-2.5 rounded-lg border border-white/20 text-white text-xs font-semibold hover:bg-white/10 transition-all"
                     >
-                      <div className="flex items-start gap-3">
-                        <input
-                          type="radio"
-                          name="payment-method"
-                          value={option.id}
-                          checked={checked}
-                          onChange={() => setSelectedMethod(option.id)}
-                          className="mt-1 h-4 w-4 accent-blue-600"
-                        />
-                        <div>
-                          <p className="text-base font-semibold text-gray-800">{option.label}</p>
-                          <p className="text-sm text-gray-500">{option.description}</p>
-                        </div>
-                      </div>
-                      {option.badge ? (
-                        <span className="text-xs font-semibold text-blue-500">{option.badge}</span>
-                      ) : null}
-                    </label>
-                  );
-                })}
-              </div>
-              <div className="mt-6 flex items-center gap-2 text-xs text-gray-500">
-                <span role="img" aria-label="lock">
-                  🔒
-                </span>
-                We protect your payment information using encryption to provide bank-level security.
-              </div>
-            </div>
+                      Apply
+                    </button>
+                  </div>
+                </div>
 
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <button
-                type="button"
-                onClick={handlePrevious}
-                className="flex items-center gap-2 rounded-2xl border border-blue-200 px-6 py-3 text-blue-600 transition hover:bg-blue-50"
-              >
-                ← Previous
-              </button>
-            </div>
+                {/* Payment Methods */}
+                <div>
+                  <label className="block text-xs font-semibold text-white/70 mb-3 uppercase tracking-wide">Payment Method</label>
+                  <div className="space-y-2">
+                    {paymentOptions.map((option) => {
+                      const checked = selectedMethod === option.id;
+                      return (
+                        <label
+                          key={option.id}
+                          className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all text-sm ${
+                            checked
+                              ? "border-[#206eaa] bg-[#206eaa]/10"
+                              : "border-white/20 bg-white/5 hover:border-white/40"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="payment-method"
+                            value={option.id}
+                            checked={checked}
+                            onChange={() => setSelectedMethod(option.id)}
+                            className="mt-1 w-4 h-4 accent-[#206eaa] cursor-pointer"
+                          />
+                          <div className="flex-1">
+                            <p className="text-white font-semibold text-xs">{option.label}</p>
+                            <p className="text-white/50 text-xs mt-0.5">{option.description}</p>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <button
-                type="submit"
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-white shadow-lg transition hover:bg-blue-700 md:flex-none md:px-12"
-              >
-                Next →
-              </button>
+                {/* Security Message */}
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5 border border-white/10 text-xs">
+                  <span className="text-sm">🔒</span>
+                  <p className="text-white/60">Bank-level security protection</p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handlePrevious}
+                    className="px-6 py-2.5 rounded-lg border border-white/20 text-white text-sm font-semibold hover:bg-white/10 transition-all"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#206eaa] to-[#1a5a8f] hover:from-[#1a5a8f] hover:to-[#0f3d5a] text-white text-sm font-semibold transition-all shadow-lg shadow-[#206eaa]/40"
+                  >
+                    Pay Now
+                  </button>
+                </div>
+              </form>
             </div>
-          </form>
-        </section>
+          </div>
+        </div>
       </div>
     </main>
   );

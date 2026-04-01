@@ -34,3 +34,11 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+page.js - HOME/LANDING PAGE (main page)
+login/page.js - Login form
+signup/page.js - Sign up form
+events/page.js - Events listing page
+events/[id]/page.js - Single event detail page
+profile/page.js - User profile page
+reset-password/page.js - Password reset form
+reviews/page.js - Reviews page
