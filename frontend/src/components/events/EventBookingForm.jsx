@@ -64,7 +64,16 @@ export default function EventBookingForm({ event }) {
         setErrorMessage("Please select a seat.");
         return;
       }
+      const selectedSeat = availableSeats.find(
+        (seat) => seat.seatNumber === formData.seat_number,
+      );
+      const seatPrice = Number(selectedSeat?.price);
+      if (!Number.isFinite(seatPrice) || seatPrice <= 0) {
+        setErrorMessage("Could not read ticket price for the selected seat.");
+        return;
+      }
       payload.seat_number = formData.seat_number;
+      payload.ticket_price = seatPrice;
     } else {
       const ticketPrice = Number(formData.ticket_price);
       if (!Number.isFinite(ticketPrice) || ticketPrice <= 0) {

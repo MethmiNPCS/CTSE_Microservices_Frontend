@@ -1,51 +1,207 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-const paymentOptions = [
-  {
-    id: "payhere",
-    label: "Payhere",
-    description: "You will be redirected to the Payhere website after submitting your order",
-    badge: "PayHere",
-  },
-  {
-    id: "bank",
-    label: "Direct Bank Transfer",
-    description: "Make payment directly through bank account",
-  },
-];
+const toApiSeatNumber = (seatId) => {
+  const s = String(seatId ?? "").trim();
+  if (/^[A-Za-z]+-\d+$/.test(s)) return s;
+  const m = /^([A-Za-z]+)(\d+)$/.exec(s);
+  return m ? `${m[1].toUpperCase()}-${m[2]}` : s;
+};
 
-export default function PaymentPage() {
+const normalizeLkPhone = (phone) => {
+  const d = String(phone || "").replace(/\D/g, "");
+  if (d.startsWith("94") && d.length >= 11) return `0${d.slice(2)}`.slice(0, 11);
+  if (d.startsWith("0") && d.length >= 10) return d.slice(0, 10);
+  if (d.length === 9) return `0${d}`;
+  return d;
+};
+
+function PaymentContent() {
   const router = useRouter();
-  const [promo, setPromo] = useState("");
-  const [selectedMethod, setSelectedMethod] = useState(paymentOptions[0].id);
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const searchParams = useSearchParams();
+  const eventId = searchParams.get("eventId") || "";
   const eventTitle = searchParams.get("title") || "Event Title";
   const eventDate = searchParams.get("date") || "Event Date";
   const eventLocation = searchParams.get("location") || "Event Location";
   const eventImage = searchParams.get("image") || "https://images.unsplash.com/photo-1464983953574-0892a7162a1e?auto=format&fit=crop&w=400&q=80";
 
-  const vipCount = parseInt(searchParams.get("vipCount")) || 0;
-  const standardCount = parseInt(searchParams.get("standardCount")) || 0;
+  const vipCount = parseInt(searchParams.get("vipCount"), 10) || 0;
+  const standardCount = parseInt(searchParams.get("standardCount"), 10) || 0;
   const totalTickets = vipCount + standardCount;
   const seats = searchParams.get("seats") || "";
-  const vipPrice = 4000;
-  const standardPrice = 1500;
-  const ticketPrice = (vipCount * vipPrice) + (standardCount * standardPrice);
-  const serviceFee = 100;
-  const total = ticketPrice + serviceFee;
+
+  const selectedSeatKeys = seats
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const [pricedLines, setPricedLines] = useState([]);
+  const [pricingLoading, setPricingLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const seatList = seats
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (!eventId || !apiBaseUrl || seatList.length === 0) {
+      setPricedLines([]);
+      setPricingLoading(false);
+      return;
+    }
+
+    setPricingLoading(true);
+
+    (async () => {
+      try {
+        const response = await fetch(`${apiBaseUrl}/events/${eventId}`, {
+          cache: "no-store",
+        });
+        const payload = await response.json();
+        const event = payload?.event ?? payload;
+        const apiSeats = Array.isArray(event?.seats) ? event.seats : [];
+        const lines = seatList.map((sn) => {
+          const key = toApiSeatNumber(sn);
+          const found = apiSeats.find(
+            (s) => String(s.seatNumber).toUpperCase() === key.toUpperCase(),
+          );
+          const price = Number(found?.price);
+          return {
+            seatNumber: found?.seatNumber || key,
+            price: Number.isFinite(price) ? price : 0,
+            available: found?.bookingStatus === "available",
+          };
+        });
+        if (!cancelled) setPricedLines(lines);
+      } catch {
+        if (!cancelled) setPricedLines([]);
+      } finally {
+        if (!cancelled) setPricingLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [eventId, seats, apiBaseUrl]);
+
+  const ticketPrice = pricedLines.reduce((sum, line) => sum + line.price, 0);
 
   const userName = searchParams.get("fullName") || "";
   const userPhone = searchParams.get("phone") || "";
   const userEmail = searchParams.get("email") || "";
 
-  const handlePrevious = () => router.push(`/details?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}`);
-  const handleSubmit = (event) => {
+  const bookingQueryBase = `eventId=${encodeURIComponent(eventId)}&title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`;
+
+  const handlePrevious = () =>
+    router.push(
+      `/details?${bookingQueryBase}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}`,
+    );
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    router.push(`/confirmation?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}&fullName=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}&email=${encodeURIComponent(userEmail)}`);
+    setErrorMessage("");
+
+    const token = typeof window !== "undefined" ? window.localStorage.getItem("authToken") : null;
+    if (!token) {
+      setErrorMessage("Please log in to complete your booking.");
+      return;
+    }
+
+    if (!eventId) {
+      setErrorMessage("Missing event. Start again from the event page.");
+      return;
+    }
+
+    const seatList = seats
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .sort();
+
+    if (seatList.length === 0) {
+      setErrorMessage("No seats selected.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const eventResponse = await fetch(`${apiBaseUrl}/events/${eventId}`, {
+        cache: "no-store",
+      });
+      if (!eventResponse.ok) {
+        throw new Error("Could not verify seats for this event.");
+      }
+      const eventPayload = await eventResponse.json();
+      const event = eventPayload?.event ?? eventPayload;
+      const apiSeats = Array.isArray(event?.seats) ? event.seats : [];
+
+      const bookingIds = [];
+
+      for (let i = 0; i < seatList.length; i += 1) {
+        const key = toApiSeatNumber(seatList[i]);
+        const found = apiSeats.find(
+          (s) => String(s.seatNumber).toUpperCase() === key.toUpperCase(),
+        );
+        if (!found) {
+          throw new Error(`Seat ${key} was not found on this event.`);
+        }
+        if (found.bookingStatus !== "available") {
+          throw new Error(`Seat ${found.seatNumber} is no longer available.`);
+        }
+        const unitPrice = Number(found.price);
+        if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
+          throw new Error(`Invalid price for seat ${found.seatNumber}.`);
+        }
+
+        const payload = {
+          customer_name: userName,
+          email: userEmail,
+          phone_number: normalizeLkPhone(userPhone),
+          event_id: eventId,
+          event_name: eventTitle,
+          seat_number: found.seatNumber,
+          ticket_price: unitPrice,
+        };
+
+        const response = await fetch(`${apiBaseUrl}/bookings`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const responsePayload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(responsePayload?.message || responsePayload?.error || "Booking failed.");
+        }
+
+        const id = responsePayload?.booking_id || responsePayload?.id;
+        if (id) {
+          bookingIds.push(id);
+        }
+      }
+
+      const idsParam = bookingIds.length ? `&bookingIds=${encodeURIComponent(bookingIds.join(","))}` : "";
+
+      router.push(
+        `/confirmation?${bookingQueryBase}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}&fullName=${encodeURIComponent(userName)}&phone=${encodeURIComponent(userPhone)}&email=${encodeURIComponent(userEmail)}${idsParam}`,
+      );
+    } catch (err) {
+      setErrorMessage(err.message || "Booking failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -85,17 +241,28 @@ export default function PaymentPage() {
                 
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-white/60">VIP Tickets</span>
-                    <span className="text-white font-semibold">{vipCount}x</span>
+                    <span className="text-white/60">Tickets</span>
+                    <span className="text-white font-semibold">
+                      {totalTickets || selectedSeatKeys.length}
+                    </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/60">Standard Tickets</span>
-                    <span className="text-white font-semibold">{standardCount}x</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/60">Seats</span>
-                    <span className="text-white font-semibold text-xs">{seats}</span>
-                  </div>
+                  {pricingLoading ? (
+                    <p className="text-white/45 text-xs">Loading prices…</p>
+                  ) : (
+                    pricedLines.map((line) => (
+                      <div
+                        key={line.seatNumber}
+                        className="flex justify-between items-center gap-2 text-xs"
+                      >
+                        <span className="text-white/60 shrink-0">{line.seatNumber}</span>
+                        <span className="text-white font-semibold">
+                          {line.price > 0
+                            ? `${line.price.toLocaleString()} LKR`
+                            : "—"}
+                        </span>
+                      </div>
+                    ))
+                  )}
                   <div className="h-px bg-white/10 my-2" />
                   <div className="flex justify-between items-center">
                     <span className="text-white/60">Attendee</span>
@@ -106,92 +273,34 @@ export default function PaymentPage() {
             </div>
           </div>
 
-          {/* Right - Payment Card */}
+          {/* Right - Confirm booking */}
           <div>
             <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-white/8 via-white/3 to-white/[0.01] backdrop-blur-lg p-8 shadow-2xl shadow-[#206eaa]/20">
               
               {/* Header */}
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-white mb-1">Payment</h1>
-                <p className="text-white/50 text-xs">Complete your booking</p>
+                <h1 className="text-3xl font-bold text-white mb-1">Confirm booking</h1>
+                <p className="text-white/50 text-xs">Review and submit to reserve your seats</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                
+                {errorMessage ? (
+                  <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+                    {errorMessage}
+                  </div>
+                ) : null}
+
                 {/* Price Summary */}
                 <div className="p-4 rounded-lg bg-white/5 border border-white/10 space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-white/60">Tickets</span>
-                    <span className="text-white font-semibold">{ticketPrice} LKR</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/60">Service Fee</span>
-                    <span className="text-white font-semibold">{serviceFee} LKR</span>
+                    <span className="text-white font-semibold">{ticketPrice.toLocaleString()} LKR</span>
                   </div>
                   <div className="h-px bg-white/10" />
                   <div className="flex justify-between items-center">
                     <span className="text-white font-semibold">Total</span>
-                    <span className="text-2xl font-black text-[#4a9fd8]">{total} LKR</span>
+                    <span className="text-2xl font-black text-[#4a9fd8]">{ticketPrice.toLocaleString()} LKR</span>
                   </div>
-                </div>
-
-                {/* Promo Code */}
-                <div>
-                  <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wide">Promo Code</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={promo}
-                      onChange={(event) => setPromo(event.target.value)}
-                      placeholder="Optional"
-                      className="flex-1 px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-[#206eaa] focus:bg-white/15 focus:ring-1 focus:ring-[#206eaa]/40 transition-all outline-none text-sm"
-                    />
-                    <button
-                      type="button"
-                      className="px-4 py-2.5 rounded-lg border border-white/20 text-white text-xs font-semibold hover:bg-white/10 transition-all"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-
-                {/* Payment Methods */}
-                <div>
-                  <label className="block text-xs font-semibold text-white/70 mb-3 uppercase tracking-wide">Payment Method</label>
-                  <div className="space-y-2">
-                    {paymentOptions.map((option) => {
-                      const checked = selectedMethod === option.id;
-                      return (
-                        <label
-                          key={option.id}
-                          className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all text-sm ${
-                            checked
-                              ? "border-[#206eaa] bg-[#206eaa]/10"
-                              : "border-white/20 bg-white/5 hover:border-white/40"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="payment-method"
-                            value={option.id}
-                            checked={checked}
-                            onChange={() => setSelectedMethod(option.id)}
-                            className="mt-1 w-4 h-4 accent-[#206eaa] cursor-pointer"
-                          />
-                          <div className="flex-1">
-                            <p className="text-white font-semibold text-xs">{option.label}</p>
-                            <p className="text-white/50 text-xs mt-0.5">{option.description}</p>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Security Message */}
-                <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5 border border-white/10 text-xs">
-                  <span className="text-sm">🔒</span>
-                  <p className="text-white/60">Bank-level security protection</p>
                 </div>
 
                 {/* Action Buttons */}
@@ -205,9 +314,10 @@ export default function PaymentPage() {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#206eaa] to-[#1a5a8f] hover:from-[#1a5a8f] hover:to-[#0f3d5a] text-white text-sm font-semibold transition-all shadow-lg shadow-[#206eaa]/40"
+                    disabled={isSubmitting}
+                    className="flex-1 px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#206eaa] to-[#1a5a8f] hover:from-[#1a5a8f] hover:to-[#0f3d5a] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold transition-all shadow-lg shadow-[#206eaa]/40"
                   >
-                    Pay Now
+                    {isSubmitting ? "Booking…" : "Confirm booking"}
                   </button>
                 </div>
               </form>
@@ -216,5 +326,19 @@ export default function PaymentPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
+          <p className="text-white/60 text-sm">Loading…</p>
+        </main>
+      }
+    >
+      <PaymentContent />
+    </Suspense>
   );
 }

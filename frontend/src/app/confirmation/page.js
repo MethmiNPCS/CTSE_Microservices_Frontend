@@ -1,8 +1,9 @@
 "use client";
 
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const eventTitle = searchParams.get("title") || "Event Title";
@@ -15,6 +16,8 @@ export default function ConfirmationPage() {
   const userEmail = searchParams.get("email") || "";
 
   const seatsParam = searchParams.get("seats") || "";
+  const bookingIdsParam = searchParams.get("bookingIds") || "";
+  const bookingIds = bookingIdsParam ? bookingIdsParam.split(",").filter(Boolean) : [];
   const seatNumbers = seatsParam ? seatsParam.split(",") : [];
   const purchasedTickets = seatNumbers.map((seat) => ({
     title: eventTitle,
@@ -57,7 +60,11 @@ export default function ConfirmationPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-1">Confirmed!</h1>
-            <p className="text-white/50 text-xs">#BK{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+            <p className="text-white/50 text-xs">
+              {bookingIds.length
+                ? bookingIds.map((id) => `#${id}`).join(" · ")
+                : `#BK${Math.random().toString(36).slice(2, 11).toUpperCase()}`}
+            </p>
           </div>
 
           {/* Details */}
@@ -124,5 +131,19 @@ export default function ConfirmationPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
+          <p className="text-white/60 text-sm">Loading confirmation…</p>
+        </main>
+      }
+    >
+      <ConfirmationContent />
+    </Suspense>
   );
 }

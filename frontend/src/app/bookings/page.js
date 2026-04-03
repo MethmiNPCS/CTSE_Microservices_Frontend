@@ -166,6 +166,11 @@ export default function BookingsPage() {
                   <p className="text-white/50 text-xs font-semibold mb-1">BOOKING TIME</p>
                   <p className="text-white font-semibold">{booking.booking_time || "-"}</p>
                 </div>
+
+                <div>
+                  <p className="text-white/50 text-xs font-semibold mb-1">SEAT</p>
+                  <p className="text-white font-semibold">{booking.seat_number || "-"}</p>
+                </div>
               </div>
             </div>
           ))}

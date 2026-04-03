@@ -137,7 +137,7 @@ export default async function EventDetailPage({ params }) {
             </div>
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <Link
-                href={`/ticket-selection?title=${encodeURIComponent(event.title)}&date=${encodeURIComponent(formatDateTime(event.start))}&location=${encodeURIComponent(event.location)}&image=${encodeURIComponent(event.galleryImages?.[0] || event.coverImage || "")}`}
+                href={`/ticket-selection?eventId=${encodeURIComponent(event._id)}&title=${encodeURIComponent(event.title)}&date=${encodeURIComponent(formatDateTime(event.start))}&location=${encodeURIComponent(event.location)}&image=${encodeURIComponent(event.galleryImages?.[0] || event.coverImage || "")}`}
               >
                 <Button variant="primary" size="lg" className="bg-[#206eaa] hover:bg-[#1a5a8f] text-white font-semibold shadow-lg shadow-[#206eaa]/30">
                   Book Tickets

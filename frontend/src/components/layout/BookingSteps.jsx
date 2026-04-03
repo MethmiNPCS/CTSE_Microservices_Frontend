@@ -4,7 +4,7 @@ export const BOOKING_STEPS = [
   { label: "Select Tickets", href: "/ticket-selection", icon: "🎟️" },
   { label: "Seat Selection", href: "/seat-selection", icon: "🪑" },
   { label: "Details", href: "/details", icon: "📝" },
-  { label: "Payment", href: "/payment", icon: "💳" },
+  { label: "Confirm", href: "/payment", icon: "✓" },
   { label: "Confirmation", href: "/confirmation", icon: "💙" },
 ];
 

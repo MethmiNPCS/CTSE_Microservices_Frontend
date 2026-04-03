@@ -1,9 +1,9 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
 
-export default function DetailsPage() {
+function DetailsContent() {
   const router = useRouter();
   const [formValues, setFormValues] = useState({
     fullName: "",
@@ -11,6 +11,7 @@ export default function DetailsPage() {
     email: "",
   });
   const searchParams = useSearchParams();
+  const eventId = searchParams.get("eventId") || "";
   const eventTitle = searchParams.get("title") || "Event Title";
   const eventDate = searchParams.get("date") || "Event Date";
   const eventLocation = searchParams.get("location") || "Event Location";
@@ -26,11 +27,18 @@ export default function DetailsPage() {
   };
 
   // Removed duplicate handlePrevious declaration
-  const handlePrevious = () => router.push(`/seat-selection?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}`);
+  const bookingQueryBase = `eventId=${encodeURIComponent(eventId)}&title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}`;
+
+  const handlePrevious = () =>
+    router.push(
+      `/seat-selection?${bookingQueryBase}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}`,
+    );
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    router.push(`/payment?title=${encodeURIComponent(eventTitle)}&date=${encodeURIComponent(eventDate)}&location=${encodeURIComponent(eventLocation)}&image=${encodeURIComponent(eventImage)}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}&fullName=${encodeURIComponent(formValues.fullName)}&phone=${encodeURIComponent(formValues.phone)}&email=${encodeURIComponent(formValues.email)}`);
+    router.push(
+      `/payment?${bookingQueryBase}&vipCount=${vipCount}&standardCount=${standardCount}&seats=${encodeURIComponent(seats)}&fullName=${encodeURIComponent(formValues.fullName)}&phone=${encodeURIComponent(formValues.phone)}&email=${encodeURIComponent(formValues.email)}`,
+    );
   };
 
   return (
@@ -137,7 +145,8 @@ export default function DetailsPage() {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#206eaa] to-[#1a5a8f] hover:from-[#1a5a8f] hover:to-[#0f3d5a] text-white text-sm font-semibold transition-all shadow-lg shadow-[#206eaa]/40"
+                    disabled={!eventId}
+                    className="flex-1 px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#206eaa] to-[#1a5a8f] hover:from-[#1a5a8f] hover:to-[#0f3d5a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-all shadow-lg shadow-[#206eaa]/40"
                   >
                     Continue
                   </button>
@@ -148,5 +157,19 @@ export default function DetailsPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function DetailsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
+          <p className="text-white/60 text-sm">Loading…</p>
+        </main>
+      }
+    >
+      <DetailsContent />
+    </Suspense>
   );
 }
