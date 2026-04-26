@@ -216,14 +216,16 @@ export default function EventReviewsSection({ eventId, eventName }) {
                       ? `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim()
                       : ""
                   }
+                  readOnly
                   className="w-full rounded-lg border border-white/30 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-[#206eaa] focus:bg-white/10"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-white/70 uppercase tracking-wide">Email</label>
-                <Input 
-                  placeholder="Email" 
-                  value={currentUser?.email || ""} 
+                <Input
+                  placeholder="Email"
+                  value={currentUser?.email || ""}
+                  readOnly
                   className="w-full rounded-lg border border-white/30 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-[#206eaa] focus:bg-white/10"
                 />
               </div>
